@@ -15,6 +15,6 @@ window.CONFIG = {
   BUCKET: 'inspection-photos',
  
   // แจ้งเตือนเข้ากลุ่ม LINE เมื่อตรวจไม่ผ่าน (ต้อง deploy Edge Function "notify-fail" ก่อน)
-  NOTIFY_ENABLED: true
+  NOTIFY_ENABLED: true,
   DRIVER_CAN_FIX: true
 };
