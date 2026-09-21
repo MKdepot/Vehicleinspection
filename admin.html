@@ -211,15 +211,28 @@
   function open(){
     $('#gate').classList.add('hide'); $('#app').classList.remove('hide');
     $('#d-date').value = today(); setQuick('month');
-    loadVehicles().then(loadDay);
+    loadVehicles().then(loadDay).then(openFromLink);
     timer = setInterval(()=>{ if(!$('#pane-day').classList.contains('hide') && $('#d-date').value===today()) loadDay(); }, 60000);
+  }
+
+  // เปิดจากปุ่มในการ์ดแจ้งเตือน LINE: admin.html?id=<inspection_id>
+  async function openFromLink(){
+    const id = new URLSearchParams(location.search).get('id');
+    if(!id) return;
+    try{
+      const { data, error } = await sb.from('inspections').select('*').eq('id', id).maybeSingle();
+      if(error) throw error;
+      if(!data) return alert('ไม่พบใบตรวจนี้ อาจถูกลบไปแล้ว');
+      $('#d-date').value = data.inspect_date; await loadDay();
+      detail(id, await withDetails([data]));
+    }catch(e){ alert('เปิดใบตรวจไม่สำเร็จ: ' + (e.message||e)); }
+    history.replaceState(null, '', location.pathname);
   }
   $('#btn-pin').onclick = ()=>{
     if($('#pin').value === String(C.ADMIN_PIN)){ sessionStorage.setItem('vi_admin','1'); open(); }
     else $('#pin-err').classList.remove('hide');
   };
   $('#pin').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#btn-pin').click(); });
-  if(sessionStorage.getItem('vi_admin')==='1') open();
 
   // ---------- helpers ----------
   const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
@@ -530,6 +543,9 @@
     await loadVehicles(); renderCars();
     alert('บันทึกรถ ' + rows.length + ' คันแล้ว');
   };
+
+  // เข้าสู่ระบบค้างไว้ในแท็บนี้แล้ว → เปิดเลย (ต้องอยู่ท้ายสุด หลังประกาศตัวแปรทั้งหมด)
+  if(sessionStorage.getItem('vi_admin')==='1') open();
 })();
 </script>
 </body>
