@@ -134,6 +134,36 @@
 <!-- โหลด -->
 <div id="loading" class="center"><div class="spin" role="status" aria-label="กำลังโหลด"></div><p id="loading-msg">กำลังเปิดระบบตรวจรถ…</p></div>
 
+<script>
+/* ตัวดักปัญหาช่วงเปิดหน้า: ถ้ามี error หรือโหลดนานเกิน จะบอกสาเหตุแทนการหมุนค้าง */
+(function(){
+  window.__step = 'โหลดไฟล์ระบบ';
+  window.__bootFail = function(title, detail){
+    var el = document.getElementById('loading');
+    if(!el || el.classList.contains('hide') || el.dataset.failed) return;
+    el.dataset.failed = '1';
+    var e = function(s){ return String(s||'').replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); };
+    el.innerHTML = '<div class="wrap" style="text-align:left"><div class="err"><b>'+e(title)+'</b>'+
+      '<div style="margin-top:6px;font-size:15px">ขั้นตอน: '+e(window.__step)+'</div>'+
+      (detail ? '<div style="margin-top:6px;font-size:14px;word-break:break-word">'+e(detail)+'</div>' : '')+'</div>'+
+      '<button class="btn" onclick="location.reload()">ลองใหม่</button>'+
+      '<button class="btn ghost" style="margin-top:10px" onclick="try{Object.keys(localStorage).forEach(function(k){if(k.indexOf(\'vi:\')===0)localStorage.removeItem(k)})}catch(x){};location.reload()">ล้างข้อมูลในเครื่องแล้วลองใหม่</button></div>';
+  };
+  window.addEventListener('error', function(ev){
+    if(ev && ev.target && ev.target.tagName === 'SCRIPT'){ window.__bootFail('โหลดไฟล์ไม่สำเร็จ', ev.target.src); return; }
+    if(ev && /config\.js/.test(ev.filename||'')){
+      window.__bootFail('ไฟล์ config.js เขียนผิดรูปแบบ', 'ตรวจว่าทุกบรรทัดมีเครื่องหมาย , คั่น (ยกเว้นบรรทัดสุดท้าย) — ' + ev.message);
+      return;
+    }
+    window.__bootFail('ระบบทำงานผิดพลาด', ev && ev.message);
+  }, true);
+  window.addEventListener('unhandledrejection', function(ev){
+    window.__bootFail('ระบบทำงานผิดพลาด', ev && ev.reason && (ev.reason.message || ev.reason));
+  });
+  setTimeout(function(){ window.__bootFail('โหลดนานผิดปกติ', 'สัญญาณเน็ตอาจไม่ดี หรือเซิร์ฟเวอร์ไม่ตอบ'); }, 20000);
+})();
+</script>
+
 <!-- 1. ลงทะเบียนครั้งแรก -->
 <section id="page-reg" class="wrap hide">
   <h1>ลงทะเบียนครั้งแรก</h1>
@@ -215,8 +245,20 @@
 <script>
 (function(){
   'use strict';
+  window.__step = 'อ่านไฟล์ตั้งค่า';
+  if(!window.CONFIG) return window.__bootFail('ไฟล์ config.js มีปัญหา',
+    'มักเกิดจากลืมใส่เครื่องหมาย , ท้ายบรรทัดก่อนหน้า หรืออัปโหลดไฟล์ไม่ครบ');
+  if(!window.supabase || !window.supabase.createClient) return window.__bootFail('โหลดไลบรารี Supabase ไม่สำเร็จ', 'ลองเปลี่ยนเป็น Wi-Fi หรือเน็ตมือถือ แล้วกดลองใหม่');
   const C = window.CONFIG;
-  const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth:{ persistSession:false } });
+
+  // ทุกคำขอมีเวลาจำกัด 12 วินาที — กันเน็ตค้างแล้วรอไม่รู้จบ
+  const fetchT = (url, opt={})=>{
+    const ac = new AbortController();
+    const t = setTimeout(()=> ac.abort(), 12000);
+    if(opt.signal) opt.signal.addEventListener('abort', ()=> ac.abort());
+    return fetch(url, { ...opt, signal: ac.signal }).finally(()=> clearTimeout(t));
+  };
+  const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth:{ persistSession:false }, global:{ fetch: fetchT } });
   const $ = s => document.querySelector(s);
   const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const uuid = ()=> (window.crypto && crypto.randomUUID ? crypto.randomUUID() :
@@ -245,6 +287,7 @@
     clearTimeout(toastT); toastT = setTimeout(()=>t.classList.add('hide'), ms||2800);
   }
   function fail(msg){
+    $('#loading').dataset.failed = '1';
     $('#loading').innerHTML = '<div class="wrap"><div class="err">'+esc(msg)+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button></div>';
     show('loading');
   }
@@ -270,6 +313,7 @@
 
   // ===== 2) LINE =====
   async function getUser(){
+    window.__step = 'เชื่อมต่อ LINE';
     if(!C.LIFF_ID){
       let id = localStorage.getItem('devUserId');
       if(!id){ id = 'DEV-' + Math.random().toString(36).slice(2,10); localStorage.setItem('devUserId', id); }
@@ -311,6 +355,7 @@
 
     // เปิดครั้งแรก → รอข้อมูลพร้อมกันทีเดียว
     try{
+      window.__step = 'โหลดข้อมูล พนง. และรายการตรวจ';
       $('#loading-msg').textContent = 'กำลังโหลดข้อมูล…';
       const [emp] = await Promise.all([
         sb.from('employees').select('*').eq('line_user_id', state.user.userId).maybeSingle(),
