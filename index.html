@@ -3,121 +3,143 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
 <title>ตรวจรถก่อนใช้งาน</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- ฟอนต์โหลดแบบไม่บล็อกหน้า: ระหว่างรอใช้ฟอนต์ในเครื่องไปก่อน -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
   :root{
-    --ink:#16211C; --muted:#5E6B64; --line:#DCE3DF;
-    --bg:#F1F4F2; --surface:#FFFFFF;
-    --pass:#0F7B4F; --pass-soft:#E4F2EB;
-    --fail:#C22F2F; --fail-soft:#FBEAEA;
-    --warn:#B26A00;
+    --ink:#16211C; --muted:#56635C; --line:#D5DDD8;
+    --bg:#EEF2EF; --surface:#FFFFFF;
+    --pass:#0F7B4F; --pass-soft:#E1F1E8;
+    --fail:#C22F2F; --fail-soft:#FBE9E9;
+    --warn:#A35F00; --warn-soft:#FFF3DE;
     --pad:16px;
     box-sizing:border-box;
   }
   *,*::before,*::after{box-sizing:inherit}
+  html{-webkit-text-size-adjust:100%}
   html,body{margin:0;padding:0}
   body{
-    font-family:'IBM Plex Sans Thai',system-ui,sans-serif;
+    font-family:'IBM Plex Sans Thai','Sukhumvit Set','Leelawadee UI','Noto Sans Thai',system-ui,sans-serif;
     background:var(--bg); color:var(--ink);
-    font-size:16px; line-height:1.5;
+    font-size:18px; line-height:1.55;
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px);
-    -webkit-text-size-adjust:100%;
+    touch-action:manipulation;              /* ตัดดีเลย์แตะ/กันซูมเวลาแตะรัว */
+    -webkit-tap-highlight-color:transparent;
   }
-  .wrap{max-width:560px;margin:0 auto;padding:var(--pad) var(--pad) 120px}
-  h1{font-size:22px;font-weight:700;margin:0 0 4px}
-  h2{font-size:15px;font-weight:600;margin:0}
-  p.sub{color:var(--muted);margin:0 0 20px;font-size:14px}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
-  label.fld{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+  button{touch-action:manipulation}
+  .wrap{max-width:560px;margin:0 auto;padding:20px var(--pad) 150px}
+  h1{font-size:26px;font-weight:700;margin:0 0 6px;line-height:1.3}
+  h2{font-size:19px;font-weight:700;margin:0}
+  p.sub{color:var(--muted);margin:0 0 22px;font-size:17px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  label.fld{display:block;font-weight:600;font-size:17px;margin-bottom:8px}
   input[type=text],input[type=tel],textarea{
-    width:100%;font:inherit;padding:12px;border:1px solid var(--line);
-    border-radius:10px;background:#fff;color:var(--ink)
+    width:100%;font:inherit;font-size:18px;padding:14px;border:1.5px solid var(--line);
+    border-radius:12px;background:#fff;color:var(--ink)
   }
-  textarea{min-height:76px;resize:vertical}
-  input:focus,textarea:focus,button:focus-visible{outline:3px solid #9ED3BC;outline-offset:1px}
+  textarea{min-height:96px;resize:vertical}
+  input:focus,textarea:focus,button:focus-visible{outline:3px solid #8ECDB2;outline-offset:1px}
   .btn{
-    display:block;width:100%;font:inherit;font-weight:600;border:0;border-radius:12px;
-    padding:15px;background:var(--pass);color:#fff;cursor:pointer
+    display:block;width:100%;font:inherit;font-size:20px;font-weight:700;border:0;border-radius:14px;
+    min-height:60px;padding:14px;background:var(--pass);color:#fff;cursor:pointer
   }
-  .btn:disabled{opacity:.45}
-  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn:active{filter:brightness(.92)}
+  .btn:disabled{opacity:.4}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+
+  /* ---------- หน้าเบอร์รถ ---------- */
   .plate{
-    width:100%;font-family:inherit;font-size:44px;font-weight:700;letter-spacing:.22em;
-    text-align:center;padding:14px;border:2px solid var(--line);border-radius:14px;background:#fff
+    width:100%;font-family:inherit;font-size:56px;font-weight:700;letter-spacing:.25em;
+    text-align:center;padding:12px 0 12px .25em;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--ink)
   }
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+  .plate::placeholder{color:#C4CCC7}
+  .vinfo{margin-top:12px;font-size:17px;min-height:26px;text-align:center}
+  .vinfo.ok{color:var(--pass);font-weight:600} .vinfo.ng{color:var(--fail);font-weight:600}
+  .recent-h{font-size:15px;color:var(--muted);margin:16px 0 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:12px;min-width:76px;min-height:52px;padding:8px 14px;font:inherit;font-size:22px;font-weight:700;letter-spacing:.08em;cursor:pointer;color:var(--ink)}
+  .admin-link{display:block;text-align:center;margin-top:40px;color:var(--muted);font-size:15px;text-decoration:underline;text-underline-offset:3px;padding:10px}
 
-  /* header */
-  .bar{
-    position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
-    padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 10px;
-    display:flex;align-items:center;gap:12px
-  }
-  .bar .no{font-size:26px;font-weight:700;letter-spacing:.12em}
-  .bar .meta{font-size:13px;color:var(--muted);flex:1}
-  .count{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+  /* ---------- แถบบน (หน้ารายการตรวจ) ---------- */
+  .bar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+  .bar .in{max-width:560px;margin:0 auto;padding:10px var(--pad);display:flex;align-items:center;gap:12px}
+  .bar .no{font-size:32px;font-weight:700;letter-spacing:.1em;line-height:1}
+  .bar .meta{font-size:15px;color:var(--muted);flex:1;min-width:0;line-height:1.3}
+  .bar .meta b{display:block;color:var(--ink);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .count{font-size:22px;font-weight:700;white-space:nowrap}
+  .count small{font-size:15px;color:var(--muted);font-weight:600}
+  .prog{height:5px;background:var(--line)}
+  .prog i{display:block;height:100%;width:0;background:var(--pass);transition:width .25s}
 
-  /* checklist */
-  .sec{margin:22px 0 8px;display:flex;align-items:baseline;gap:8px}
-  .sec .n{font-size:13px;font-weight:700;color:var(--pass)}
-  .item{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px}
+  /* ---------- รายการตรวจ ---------- */
+  .sec{margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+  .sec .n{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;font-weight:700;display:grid;place-items:center;flex:none}
+  .item{background:var(--surface);border:1.5px solid var(--line);border-left:6px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;scroll-margin-top:96px}
   .item.ok{border-left-color:var(--pass)}
   .item.ng{border-left-color:var(--fail);background:var(--fail-soft)}
-  .item .txt{display:flex;gap:8px;margin-bottom:12px}
-  .item .code{font-weight:700;color:var(--muted);min-width:30px}
-  .must{color:var(--warn);font-size:13px;font-weight:600;display:block;margin-top:2px}
-  .seg{display:flex;gap:8px}
+  .item.wait{border-left-color:var(--warn);background:var(--warn-soft)}
+  .item .txt{display:flex;gap:10px;margin-bottom:14px;font-size:19px;line-height:1.5}
+  .item .code{font-weight:700;color:var(--muted);min-width:36px;flex:none}
+  .must{color:var(--warn);font-size:15px;font-weight:600;display:block;margin-top:4px}
+  .seg{display:flex;gap:10px}
   .seg button{
-    flex:1;font:inherit;font-weight:700;padding:12px 4px;border-radius:10px;
-    border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer
+    flex:1;font:inherit;font-size:20px;font-weight:700;min-height:58px;padding:10px 4px;border-radius:12px;
+    border:2px solid var(--line);background:#fff;color:var(--muted);cursor:pointer
   }
   .seg button[aria-pressed="true"].yes{background:var(--pass);border-color:var(--pass);color:#fff}
   .seg button[aria-pressed="true"].no{background:var(--fail);border-color:var(--fail);color:#fff}
-  .ngbox{margin-top:12px;padding-top:12px;border-top:1px dashed #E2B8B8}
-  .photo-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  .pbtn{flex:1;min-width:130px;text-align:center;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px;font:inherit;font-weight:600;cursor:pointer}
-  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .seg button[aria-pressed="true"].carry{background:var(--warn);border-color:var(--warn);color:#fff}
+  .ngbox{margin-top:14px;padding-top:14px;border-top:1.5px dashed #E0AFAF}
+  .photo-row{display:flex;gap:10px;margin-top:12px}
+  .pbtn{flex:1;text-align:center;border:1.5px solid var(--line);background:#fff;border-radius:12px;min-height:56px;padding:10px;font:inherit;font-size:18px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .thumbs,.dthumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .thumb{position:relative;width:88px;height:88px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .thumb button{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:22px;padding:0;cursor:pointer}
+  .thumb button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font-size:18px;line-height:30px;padding:0;cursor:pointer}
+  .defect{background:#FFE9C2;border:1px solid #EBC680;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:17px}
+  .defect .h{font-weight:700;color:#6E3F00;font-size:18px}
+  .defect .d{margin-top:4px}
+  .defect .m{color:#6E5A36;font-size:15px;margin-top:4px}
+  .dthumbs img{width:76px;height:76px;object-fit:cover;border-radius:8px;border:1px solid #EBC680}
 
-  /* footer */
-  .foot{
-    position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
-    border-top:1px solid var(--line);padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom,0px))
-  }
+  /* ---------- แถบล่าง ---------- */
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+        padding:10px var(--pad) calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 16px rgba(0,0,0,.05)}
   .foot .inner{max-width:560px;margin:0 auto}
-  .status{font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center}
-  .status b.ng{color:var(--fail)}
+  .status{display:block;width:100%;background:none;border:0;font:inherit;font-size:17px;color:var(--muted);margin:0 0 8px;text-align:center;padding:4px;cursor:pointer}
+  .status u{text-underline-offset:3px}
+  .status b.ng{color:var(--fail)} .status b.w{color:var(--warn)}
 
-  .vinfo{margin-top:10px;font-size:14px;min-height:21px;text-align:center}
-  .vinfo.ok{color:var(--pass);font-weight:600} .vinfo.ng{color:var(--fail);font-weight:600}
-  .admin-link{display:block;text-align:center;margin-top:36px;color:var(--muted);font-size:14px;text-decoration:underline;text-underline-offset:3px}
-  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#16211C;color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;z-index:60;max-width:88%;text-align:center}
+  /* ---------- อื่น ๆ ---------- */
+  .toast{position:fixed;left:50%;bottom:calc(120px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#16211C;color:#fff;padding:14px 20px;border-radius:14px;font-size:17px;z-index:60;width:max-content;max-width:90%;text-align:center}
   .hide{display:none!important}
-  .center{text-align:center;padding:60px 20px;color:var(--muted)}
-  .big{font-size:56px;line-height:1}
-  .err{background:var(--fail-soft);border:1px solid #E7B9B9;color:#8A2222;border-radius:10px;padding:12px;font-size:14px;margin-bottom:12px}
-  @media (prefers-reduced-motion:no-preference){.toast{animation:pop .18s ease-out}}
-  @keyframes pop{from{opacity:0;transform:translate(-50%,8px)}}
+  .center{text-align:center;padding:64px 20px 24px;color:var(--muted)}
+  .big{font-size:64px;line-height:1.1}
+  .err{background:var(--fail-soft);border:1px solid #E7B9B9;color:#8A2222;border-radius:12px;padding:14px;font-size:17px;margin-bottom:14px}
+  .done-row{padding:10px 0;border-bottom:1px solid var(--line)}
+  .done-row:last-child{border-bottom:0}
+  .done-row .s{color:var(--muted);font-size:16px}
+  .spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--pass);margin:0 auto 16px;animation:sp 0.8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}.prog i{transition:none}}
 </style>
 </head>
 <body>
 
 <!-- โหลด -->
-<div id="loading" class="center"><div class="big">⏳</div><p>กำลังเชื่อมต่อ…</p></div>
+<div id="loading" class="center"><div class="spin" role="status" aria-label="กำลังโหลด"></div><p id="loading-msg">กำลังเปิดระบบตรวจรถ…</p></div>
 
 <!-- 1. ลงทะเบียนครั้งแรก -->
 <section id="page-reg" class="wrap hide">
   <h1>ลงทะเบียนครั้งแรก</h1>
-  <p class="sub">กรอกชื่อ–นามสกุลหนึ่งครั้ง ครั้งต่อไปเข้าใช้งานได้ทันที</p>
+  <p class="sub">กรอกชื่อ–นามสกุลครั้งเดียว ครั้งต่อไปเข้าใช้งานได้ทันที</p>
   <div class="card">
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:18px">
       <label class="fld" for="fn">ชื่อ</label>
       <input id="fn" type="text" autocomplete="given-name" placeholder="เช่น สมชาย">
     </div>
@@ -134,10 +156,13 @@
   <h1 id="hello">ตรวจรถก่อนใช้งาน</h1>
   <p class="sub" id="hello-sub"></p>
   <div class="card">
-    <label class="fld" for="plate">เบอร์รถ 3 หลัก</label>
-    <input id="plate" class="plate" type="tel" inputmode="numeric" maxlength="3" placeholder="000">
-    <div class="vinfo" id="vinfo"></div>
-    <div class="chips" id="recent"></div>
+    <label class="fld" for="plate" style="text-align:center">เบอร์รถ 3 หลัก</label>
+    <input id="plate" class="plate" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="000" autocomplete="off">
+    <div class="vinfo" id="vinfo" aria-live="polite"></div>
+    <div id="recent-wrap" class="hide">
+      <div class="recent-h">รถที่ตรวจล่าสุด</div>
+      <div class="chips" id="recent"></div>
+    </div>
   </div>
   <button class="btn" id="btn-start" disabled>เริ่มตรวจรถ</button>
   <a class="admin-link" href="./admin.html">เข้าหน้าแอดมิน</a>
@@ -146,20 +171,24 @@
 <!-- 3. รายการตรวจ -->
 <section id="page-check" class="hide">
   <div class="bar">
-    <div class="no" id="bar-plate">000</div>
-    <div class="meta" id="bar-name"></div>
-    <div class="count" id="bar-count">0/20</div>
+    <div class="in">
+      <div class="no" id="bar-plate">000</div>
+      <div class="meta"><b id="bar-name"></b><span id="bar-car"></span></div>
+      <div class="count" id="bar-count">0<small>/20</small></div>
+    </div>
+    <div class="prog"><i id="bar-prog"></i></div>
   </div>
-  <div class="wrap" style="padding-top:12px">
+  <div class="wrap" style="padding-top:4px">
     <div id="list"></div>
-    <div class="card" style="margin-top:16px">
+    <div class="card" style="margin-top:20px">
       <label class="fld" for="other">ความผิดปกติอื่น ๆ</label>
       <textarea id="other" placeholder="ไม่มี / ระบุสิ่งที่พบเพิ่มเติม"></textarea>
     </div>
+    <button class="btn ghost" id="btn-back" style="margin-top:6px">← เปลี่ยนเบอร์รถ</button>
   </div>
   <div class="foot">
     <div class="inner">
-      <div class="status" id="foot-status">เลือกผลให้ครบทุกข้อ</div>
+      <button type="button" class="status" id="foot-status">เลือกผลให้ครบทุกข้อ</button>
       <button class="btn" id="btn-save" disabled>บันทึกผลการตรวจ</button>
     </div>
   </div>
@@ -167,111 +196,177 @@
 
 <!-- 4. เสร็จสิ้น -->
 <section id="page-done" class="wrap hide">
-  <div class="center">
+  <div class="center" style="padding-top:40px">
     <div class="big" id="done-icon">✅</div>
     <h1 id="done-title">บันทึกแล้ว</h1>
-    <p class="sub" id="done-sub"></p>
+    <p class="sub" id="done-sub" style="margin:0"></p>
   </div>
   <div class="card hide" id="done-fails"></div>
-  <button class="btn hide" id="btn-repair" style="background:var(--fail);margin-bottom:10px">ส่งแจ้งซ่อม</button>
-  <button class="btn ghost" id="btn-again">ตรวจคันต่อไป</button>
+  <button class="btn" id="btn-again">ตรวจคันต่อไป</button>
+  <button class="btn ghost hide" id="btn-close" style="margin-top:10px">ปิดหน้านี้</button>
 </section>
 
-<div id="toast" class="toast hide"></div>
+<div id="toast" class="toast hide" role="status" aria-live="polite"></div>
 
+<!-- ปักเวอร์ชันไลบรารี: ไม่ต้องเสียเวลา redirect หาเวอร์ชันล่าสุดทุกครั้ง -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
 <script src="./config.js"></script>
 <script>
 (function(){
   'use strict';
   const C = window.CONFIG;
-  const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth:{ persistSession:false } });
   const $ = s => document.querySelector(s);
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const uuid = ()=> (window.crypto && crypto.randomUUID ? crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{ const r=Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); }));
+  const bkkDate = (d=new Date())=> d.toLocaleDateString('en-CA', { timeZone:'Asia/Bangkok' });
+  const daysBetween = (a,b)=> Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+  const thDate = iso => new Date(iso + 'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
 
-  const state = { user:null, emp:null, items:[], vehicles:{}, answers:{}, plate:'', saving:false, lastFails:[], lastId:null };
+  // แคชในเครื่อง: เปิดครั้งถัดไปแสดงผลได้ทันที แล้วค่อยอัปเดตเบื้องหลัง
+  const cache = {
+    get(k){ try{ return JSON.parse(localStorage.getItem('vi:'+k)); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem('vi:'+k, JSON.stringify(v)); }catch(e){} },
+    del(k){ try{ localStorage.removeItem('vi:'+k); }catch(e){} }
+  };
+
+  const state = { user:null, emp:null, items:[], vehicles:{}, defects:{}, defectPhotos:{}, answers:{}, plate:'', saving:false, summary:null };
 
   function show(id){
-    ['loading','page-reg','page-vehicle','page-check','page-done'].forEach(p=>{
-      const el = document.getElementById(p); if(el) el.classList.toggle('hide', p!==id);
-    });
+    ['loading','page-reg','page-vehicle','page-check','page-done'].forEach(p=>
+      document.getElementById(p).classList.toggle('hide', p!==id));
     window.scrollTo(0,0);
   }
   let toastT;
-  function toast(msg){
+  function toast(msg, ms){
     const t = $('#toast'); t.textContent = msg; t.classList.remove('hide');
-    clearTimeout(toastT); toastT = setTimeout(()=>t.classList.add('hide'), 2600);
+    clearTimeout(toastT); toastT = setTimeout(()=>t.classList.add('hide'), ms||2800);
   }
   function fail(msg){
-    document.getElementById('loading').innerHTML =
-      '<div class="wrap"><div class="err">'+msg+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button></div>';
+    $('#loading').innerHTML = '<div class="wrap"><div class="err">'+esc(msg)+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button></div>';
     show('loading');
   }
 
-  // ---------- เริ่มต้น: LIFF ----------
-  async function init(){
-    try{
-      if(C.LIFF_ID){
-        await liff.init({ liffId: C.LIFF_ID });
-        if(!liff.isLoggedIn()){ liff.login(); return; }
-        const p = await liff.getProfile();
-        state.user = { userId:p.userId, displayName:p.displayName, pictureUrl:p.pictureUrl };
-      }else{
-        let id = localStorage.getItem('devUserId');
-        if(!id){ id = 'DEV-' + Math.random().toString(36).slice(2,10); localStorage.setItem('devUserId', id); }
-        state.user = { userId:id, displayName:'โหมดทดสอบ', pictureUrl:null };
-      }
-    }catch(e){
-      return fail('เชื่อมต่อ LINE ไม่สำเร็จ: ' + (e.message||e));
-    }
+  // ===== 1) ดึงรายการตรวจ + ทะเบียนรถทันที ไม่ต้องรอ LINE =====
+  function applyStatic(items, vehicles){
+    state.items = items || [];
+    state.vehicles = {};
+    (vehicles||[]).forEach(v=> state.vehicles[v.vehicle_number] = v);
+  }
+  const staticReady = Promise.all([
+    sb.from('checklist_items').select('id,section,section_name,code,label,critical,sort_order').eq('active', true).order('sort_order'),
+    sb.from('vehicles').select('vehicle_number,plate,vehicle_type').eq('active', true)
+  ]).then(([it, vs])=>{
+    if(it.error) throw it.error;
+    if(vs.error) throw vs.error;
+    cache.set('items', it.data); cache.set('vehicles', vs.data);
+    // ถ้ากำลังตรวจอยู่ อย่าเปลี่ยนรายการกลางคัน (ครั้งหน้าจะได้ของใหม่)
+    if(document.getElementById('page-check').classList.contains('hide')) applyStatic(it.data, vs.data);
+  });
+  const cachedItems = cache.get('items'), cachedVeh = cache.get('vehicles');
+  if(cachedItems && cachedItems.length) applyStatic(cachedItems, cachedVeh);
 
-    try{
-      const { data, error } = await sb.from('employees').select('*').eq('line_user_id', state.user.userId).maybeSingle();
-      if(error) throw error;
-      const it = await sb.from('checklist_items').select('*').eq('active', true).order('sort_order');
-      if(it.error) throw it.error;
-      state.items = it.data || [];
-      const vs = await sb.from('vehicles').select('*').eq('active', true);
-      if(vs.error) throw vs.error;
-      (vs.data||[]).forEach(v=> state.vehicles[v.vehicle_number] = v);
-      if(data){ state.emp = data; goVehicle(); } else { show('page-reg'); }
-    }catch(e){
-      fail('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (e.message||e));
+  // ===== 2) LINE =====
+  async function getUser(){
+    if(!C.LIFF_ID){
+      let id = localStorage.getItem('devUserId');
+      if(!id){ id = 'DEV-' + Math.random().toString(36).slice(2,10); localStorage.setItem('devUserId', id); }
+      return { userId:id };
     }
+    await liff.init({ liffId: C.LIFF_ID });
+    if(!liff.isLoggedIn()){ liff.login(); return null; }
+    // getContext อ่านจากเครื่อง ไม่ต้องยิงเน็ต — เร็วกว่า getProfile
+    const ctx = liff.getContext && liff.getContext();
+    if(ctx && ctx.userId) return { userId: ctx.userId };
+    const p = await liff.getProfile();
+    return { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
   }
 
-  // ---------- ลงทะเบียน ----------
+  async function init(){
+    try{
+      state.user = await getUser();
+      if(!state.user) return;                         // กำลัง redirect ไป login
+    }catch(e){ return fail('เชื่อมต่อ LINE ไม่สำเร็จ: ' + (e.message||e)); }
+
+    const empKey = 'emp:' + state.user.userId;
+    const cachedEmp = cache.get(empKey);
+
+    // มีข้อมูลในเครื่องครบ → เข้าหน้าเบอร์รถทันที แล้วตรวจสอบกับฐานข้อมูลเบื้องหลัง
+    if(cachedEmp && state.items.length){
+      state.emp = cachedEmp;
+      goVehicle();
+      Promise.all([
+        sb.from('employees').select('*').eq('line_user_id', state.user.userId).maybeSingle(),
+        staticReady.catch(()=>{})
+      ]).then(([r])=>{
+        if(r.error) return;
+        if(!r.data){ cache.del(empKey); state.emp = null; show('page-reg'); return; }
+        state.emp = r.data; cache.set(empKey, r.data);
+        if(!$('#page-vehicle').classList.contains('hide')){ setHello(); checkPlate($('#plate').value); }
+      });
+      return;
+    }
+
+    // เปิดครั้งแรก → รอข้อมูลพร้อมกันทีเดียว
+    try{
+      $('#loading-msg').textContent = 'กำลังโหลดข้อมูล…';
+      const [emp] = await Promise.all([
+        sb.from('employees').select('*').eq('line_user_id', state.user.userId).maybeSingle(),
+        staticReady
+      ]);
+      if(emp.error) throw emp.error;
+      if(emp.data){ state.emp = emp.data; cache.set(empKey, emp.data); goVehicle(); }
+      else show('page-reg');
+    }catch(e){ fail('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (e.message||e)); }
+  }
+
+  // ===== ลงทะเบียน =====
   $('#btn-reg').addEventListener('click', async ()=>{
     const fn = $('#fn').value.trim(), ln = $('#ln').value.trim();
     if(!fn || !ln) return toast('กรอกชื่อและนามสกุลให้ครบ');
     $('#btn-reg').disabled = true;
+    let prof = state.user;
+    if(C.LIFF_ID && !prof.displayName){ try{ const p = await liff.getProfile(); prof = { ...prof, displayName:p.displayName, pictureUrl:p.pictureUrl }; }catch(e){} }
     const { data, error } = await sb.from('employees').insert({
       line_user_id: state.user.userId, first_name: fn, last_name: ln,
-      display_name: state.user.displayName, picture_url: state.user.pictureUrl
+      display_name: prof.displayName || null, picture_url: prof.pictureUrl || null
     }).select().single();
     $('#btn-reg').disabled = false;
     if(error) return toast('บันทึกไม่สำเร็จ: ' + error.message);
-    state.emp = data; goVehicle();
+    state.emp = data; cache.set('emp:' + state.user.userId, data);
+    await staticReady.catch(()=>{});
+    goVehicle();
   });
 
-  // ---------- หน้าเบอร์รถ ----------
-  async function goVehicle(){
-    const name = state.emp.first_name + ' ' + state.emp.last_name;
-    $('#hello').textContent = 'สวัสดี ' + state.emp.first_name;
-    $('#hello-sub').textContent = 'กรอกเบอร์รถที่จะตรวจ (' + name + ')';
-    $('#plate').value = ''; checkPlate('');
-    show('page-vehicle');
-    $('#plate').focus();
-    const { data } = await sb.from('inspections').select('vehicle_number')
-      .eq('line_user_id', state.user.userId).order('inspected_at',{ascending:false}).limit(12);
-    const seen = [...new Set((data||[]).map(r=>r.vehicle_number))].slice(0,5);
+  // ===== หน้าเบอร์รถ =====
+  function setHello(){
+    $('#hello').textContent = 'สวัสดี คุณ' + state.emp.first_name;
+    $('#hello-sub').textContent = 'กรอกเบอร์รถที่จะตรวจวันนี้';
+  }
+  function renderRecent(list){
     const box = $('#recent'); box.innerHTML = '';
-    seen.forEach(v=>{
+    list.forEach(v=>{
       const b = document.createElement('button');
       b.className='chip'; b.type='button'; b.textContent = v;
       b.onclick = ()=>{ $('#plate').value = v; checkPlate(v); };
       box.appendChild(b);
     });
+    $('#recent-wrap').classList.toggle('hide', !list.length);
+  }
+  function goVehicle(){
+    setHello();
+    $('#plate').value = ''; checkPlate('');
+    show('page-vehicle');
+    const rk = 'recent:' + state.user.userId;
+    renderRecent(cache.get(rk) || []);
+    sb.from('inspections').select('vehicle_number').eq('line_user_id', state.user.userId)
+      .order('inspected_at',{ascending:false}).limit(15)
+      .then(({data})=>{
+        const seen = [...new Set((data||[]).map(r=>r.vehicle_number))].slice(0,6);
+        cache.set(rk, seen); renderRecent(seen);
+      });
   }
   function checkPlate(v){
     const info = $('#vinfo');
@@ -280,29 +375,57 @@
     const hasList = Object.keys(state.vehicles).length > 0;
     const car = state.vehicles[v];
     if(hasList && !car){
-      info.className = 'vinfo ng'; info.textContent = 'ไม่พบรถเบอร์ ' + v + ' ในระบบ ตรวจเบอร์อีกครั้ง หรือแจ้งแอดมิน';
+      info.className = 'vinfo ng'; info.textContent = 'ไม่พบรถเบอร์ ' + v + ' ในระบบ';
       $('#btn-start').disabled = true; return;
     }
     if(car){
       info.className = 'vinfo ok';
-      info.textContent = [car.plate ? 'ทะเบียน ' + car.plate : '', car.vehicle_type||''].filter(Boolean).join(' • ') || 'พบรถในระบบ';
+      info.textContent = '✓ ' + ([car.plate ? 'ทะเบียน ' + car.plate : '', car.vehicle_type||''].filter(Boolean).join(' • ') || 'พบรถในระบบ');
     }
     $('#btn-start').disabled = false;
   }
   $('#plate').addEventListener('input', e=>{
     e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
     checkPlate(e.target.value);
+    if(e.target.value.length === 3) e.target.blur();          // ครบ 3 หลัก → เก็บคีย์บอร์ดให้เห็นปุ่ม
   });
-  $('#btn-start').addEventListener('click', ()=>{
+  $('#plate').addEventListener('keydown', e=>{ if(e.key==='Enter' && !$('#btn-start').disabled) $('#btn-start').click(); });
+
+  $('#btn-start').addEventListener('click', async ()=>{
     state.plate = $('#plate').value;
-    state.answers = {}; $('#other').value = '';
-    renderList(); show('page-check');
+    state.answers = {}; state.defects = {}; state.defectPhotos = {}; $('#other').value = '';
+    $('#btn-start').disabled = true; $('#btn-start').textContent = 'กำลังโหลด…';
+    try{
+      const d = await sb.from('defects').select('*').eq('vehicle_number', state.plate).eq('status','open');
+      if(d.error) throw d.error;
+      (d.data||[]).forEach(x=> state.defects[x.item_id] = x);
+      renderList(); show('page-check');
+      // รูปของงานรอซ่อมโหลดตามมาทีหลัง ไม่ต้องรอ
+      const rids = (d.data||[]).map(x=>x.first_result_id).filter(Boolean);
+      if(rids.length){
+        sb.from('inspection_photos').select('result_id,url').in('result_id', rids).then(({data})=>{
+          (data||[]).forEach(p=> (state.defectPhotos[p.result_id] = state.defectPhotos[p.result_id] || []).push(p.url));
+          Object.values(state.defects).forEach(df=>{
+            const box = document.querySelector('#it-'+df.item_id+' .dthumbs');
+            const urls = state.defectPhotos[df.first_result_id] || [];
+            if(box && urls.length){ box.innerHTML = urls.map(u=>'<img src="'+esc(u)+'" alt="รูปตอนแจ้ง" loading="lazy" onclick="window.open(this.src)">').join(''); box.classList.remove('hide'); }
+          });
+        });
+      }
+    }catch(e){ toast('โหลดข้อมูลรถไม่สำเร็จ: ' + (e.message||e)); }
+    finally{ $('#btn-start').textContent = 'เริ่มตรวจรถ'; checkPlate(state.plate); }
+  });
+  $('#btn-back').addEventListener('click', ()=>{
+    if(Object.keys(state.answers).length && !confirm('ยังไม่ได้บันทึก ต้องการออกจากหน้านี้ใช่ไหม?')) return;
+    goVehicle();
   });
 
-  // ---------- รายการตรวจ ----------
+  // ===== รายการตรวจ =====
   function renderList(){
     $('#bar-plate').textContent = state.plate;
     $('#bar-name').textContent = state.emp.first_name + ' ' + state.emp.last_name;
+    const car = state.vehicles[state.plate];
+    $('#bar-car').textContent = car ? [car.plate, car.vehicle_type].filter(Boolean).join(' • ') : '';
     const list = $('#list'); list.innerHTML = '';
     let sec = null;
     state.items.forEach(item=>{
@@ -310,29 +433,55 @@
         sec = item.section_name;
         const h = document.createElement('div');
         h.className = 'sec';
-        h.innerHTML = '<span class="n">'+item.section+'</span><h2>'+sec+'</h2>';
+        h.innerHTML = '<span class="n">'+item.section+'</span><h2>'+esc(sec)+'</h2>';
         list.appendChild(h);
       }
       const d = document.createElement('div');
       d.className = 'item'; d.id = 'it-'+item.id;
-      d.innerHTML =
-        '<div class="txt"><span class="code">'+item.code+'</span><span>'+item.label+
-        (item.critical ? '<span class="must">ไม่ผ่าน = ต้องแก้ไขทันที</span>' : '')+'</span></div>'+
-        '<div class="seg">'+
-          '<button type="button" class="yes" data-r="pass" aria-pressed="false">ผ่าน</button>'+
-          '<button type="button" class="no"  data-r="fail" aria-pressed="false">ไม่ผ่าน</button>'+
-        '</div><div class="ngbox hide"></div>';
-      d.querySelectorAll('.seg button').forEach(b=>{
-        b.onclick = ()=> setAnswer(item, b.dataset.r);
-      });
+      const df = state.defects[item.id];
+      if(df){
+        const days = daysBetween(df.first_date, bkkDate());
+        d.classList.add('wait');
+        d.innerHTML =
+          '<div class="txt"><span class="code">'+esc(item.code)+'</span><span>'+esc(item.label)+'</span></div>'+
+          '<div class="defect"><div class="h">⏳ รอซ่อม • '+(days>0 ? 'รอมาแล้ว '+days+' วัน' : 'แจ้งวันนี้')+'</div>'+
+          '<div class="d">'+esc(df.first_detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+
+          '<div class="m">แจ้งครั้งแรก '+thDate(df.first_date)+' โดย '+esc(df.reported_by||'-')+' • พบ '+(df.seen_count||1)+' ครั้ง</div>'+
+          '<div class="dthumbs hide"></div></div>'+
+          '<div class="seg">'+
+            '<button type="button" class="carry" data-r="carry" aria-pressed="false">ยังไม่ได้ซ่อม</button>'+
+            (C.DRIVER_CAN_FIX ? '<button type="button" class="yes" data-r="fixed" aria-pressed="false">ซ่อมเสร็จแล้ว</button>' : '')+
+          '</div>'+
+          '<textarea class="dnote" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" style="margin-top:12px;min-height:64px"></textarea>';
+        d.querySelectorAll('.seg button').forEach(b=> b.onclick = ()=> setDefect(item, b.dataset.r));
+        d.querySelector('.dnote').oninput = e=>{ (state.answers[item.id] = state.answers[item.id] || {}).note = e.target.value; };
+      }else{
+        d.innerHTML =
+          '<div class="txt"><span class="code">'+esc(item.code)+'</span><span>'+esc(item.label)+
+          (item.critical ? '<span class="must">⚠ ไม่ผ่าน = ต้องแก้ไขทันที</span>' : '')+'</span></div>'+
+          '<div class="seg">'+
+            '<button type="button" class="yes" data-r="pass" aria-pressed="false">✓ ผ่าน</button>'+
+            '<button type="button" class="no"  data-r="fail" aria-pressed="false">✗ ไม่ผ่าน</button>'+
+          '</div><div class="ngbox hide"></div>';
+        d.querySelectorAll('.seg button').forEach(b=> b.onclick = ()=> setAnswer(item, b.dataset.r));
+      }
       list.appendChild(d);
     });
     updateFoot();
   }
 
+  // ตอบข้อนี้แล้ว (ผ่าน) → เลื่อนไปข้อถัดไปที่ยังไม่ได้ตอบ
+  function goNext(fromItem){
+    const idx = state.items.findIndex(i=>i.id===fromItem.id);
+    const next = state.items.slice(idx+1).find(i=> !(state.answers[i.id] && state.answers[i.id].result));
+    if(!next) return;
+    setTimeout(()=> document.getElementById('it-'+next.id).scrollIntoView({ behavior:'smooth', block:'start' }), 180);
+  }
+
   function setAnswer(item, result){
     const cur = state.answers[item.id];
     if(cur && cur.result === result && result === 'fail') return;
+    const first = !(cur && cur.result);
     state.answers[item.id] = state.answers[item.id] || { detail:'', photos:[] };
     state.answers[item.id].result = result;
     const box = document.getElementById('it-'+item.id);
@@ -341,19 +490,36 @@
     box.querySelectorAll('.seg button').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.r===result)));
     const ng = box.querySelector('.ngbox');
     if(result === 'fail'){ ng.classList.remove('hide'); renderNg(item, ng); }
-    else { ng.classList.add('hide'); ng.innerHTML=''; ng.dataset.built=''; state.answers[item.id].detail=''; state.answers[item.id].photos=[]; }
+    else{
+      ng.classList.add('hide'); ng.innerHTML=''; ng.dataset.built='';
+      state.answers[item.id].detail=''; state.answers[item.id].photos=[];
+      if(first) goNext(item);
+    }
+    updateFoot();
+  }
+
+  function setDefect(item, mode){
+    const a = state.answers[item.id] = state.answers[item.id] || {};
+    const first = !a.result;
+    a.mode = mode;
+    a.result = mode === 'fixed' ? 'pass' : 'fail';
+    const box = document.getElementById('it-'+item.id);
+    box.querySelectorAll('.seg button').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.r===mode)));
+    box.classList.toggle('ok', mode==='fixed');
+    box.classList.toggle('wait', mode!=='fixed');
+    if(first) goNext(item);
     updateFoot();
   }
 
   function renderNg(item, ng){
-    if(ng.dataset.built === '1'){ return; }
+    if(ng.dataset.built === '1') return;
     ng.dataset.built = '1';
     ng.innerHTML =
       '<label class="fld">รายละเอียดที่พบ</label>'+
-      '<textarea placeholder="ระบุสิ่งที่พบ เช่น ไฟเลี้ยวขวาไม่ติด"></textarea>'+
+      '<textarea placeholder="เช่น ไฟเลี้ยวขวาไม่ติด"></textarea>'+
       '<div class="photo-row">'+
         '<button type="button" class="pbtn" data-a="cam">📷 ถ่ายรูป</button>'+
-        '<button type="button" class="pbtn" data-a="file">🖼 แนบรูป</button>'+
+        '<button type="button" class="pbtn" data-a="file">🖼 เลือกรูป</button>'+
       '</div>'+
       '<input type="file" accept="image/*" capture="environment" class="hide" data-i="cam">'+
       '<input type="file" accept="image/*" multiple class="hide" data-i="file">'+
@@ -361,16 +527,15 @@
     const ta = ng.querySelector('textarea');
     ta.value = state.answers[item.id].detail || '';
     ta.oninput = ()=>{ state.answers[item.id].detail = ta.value; };
+    setTimeout(()=> ta.focus(), 50);
     ng.querySelector('[data-a=cam]').onclick  = ()=> ng.querySelector('[data-i=cam]').click();
     ng.querySelector('[data-a=file]').onclick = ()=> ng.querySelector('[data-i=file]').click();
     ng.querySelectorAll('input[type=file]').forEach(inp=>{
       inp.onchange = async e=>{
         for(const f of e.target.files){
           if(state.answers[item.id].photos.length >= 5){ toast('แนบได้สูงสุด 5 รูปต่อข้อ'); break; }
-          try{
-            const blob = await compress(f);
-            state.answers[item.id].photos.push(blob);
-          }catch(err){ toast('อ่านไฟล์รูปไม่ได้'); }
+          try{ state.answers[item.id].photos.push(await compress(f)); }
+          catch(err){ toast('อ่านไฟล์รูปไม่ได้'); }
         }
         e.target.value = '';
         drawThumbs(item, ng);
@@ -382,7 +547,7 @@
     const box = ng.querySelector('.thumbs'); box.innerHTML = '';
     state.answers[item.id].photos.forEach((blob, i)=>{
       const d = document.createElement('div'); d.className='thumb';
-      const img = document.createElement('img'); img.src = URL.createObjectURL(blob);
+      const img = document.createElement('img'); img.src = URL.createObjectURL(blob); img.alt = 'รูปที่แนบ';
       const x = document.createElement('button'); x.type='button'; x.textContent='×';
       x.setAttribute('aria-label','ลบรูป');
       x.onclick = ()=>{ state.answers[item.id].photos.splice(i,1); drawThumbs(item, ng); };
@@ -390,7 +555,7 @@
     });
   }
 
-  // ย่อรูปก่อนอัปโหลด (กัน 4G ช้า)
+  // ย่อรูปก่อนอัปโหลด (กันเน็ตช้า)
   function compress(file, max=1400, q=0.72){
     return new Promise((res, rej)=>{
       const img = new Image();
@@ -408,102 +573,162 @@
     });
   }
 
-  function updateFoot(){
-    const done = Object.keys(state.answers).length;
-    const total = state.items.length;
-    const ng = state.items.filter(i=> state.answers[i.id] && state.answers[i.id].result==='fail').length;
-    $('#bar-count').textContent = done + '/' + total;
-    $('#foot-status').innerHTML = done < total
-      ? ('ยังเหลืออีก ' + (total-done) + ' ข้อ')
-      : (ng ? ('ไม่ผ่าน <b class="ng">' + ng + ' ข้อ</b>') : 'ผ่านครบทุกข้อ');
-    $('#btn-save').disabled = done < total || state.saving;
-  }
+  function firstUnanswered(){ return state.items.find(i=> !(state.answers[i.id] && state.answers[i.id].result)); }
 
-  // ---------- บันทึก ----------
+  function updateFoot(){
+    const total = state.items.length;
+    const ans = state.items.map(i=> state.answers[i.id]).filter(a=> a && a.result);
+    const nNew   = ans.filter(a=> a.result==='fail' && !a.mode).length;
+    const nCarry = ans.filter(a=> a.mode==='carry').length;
+    const doneN  = ans.length;
+    $('#bar-count').innerHTML = doneN + '<small>/' + total + '</small>';
+    $('#bar-prog').style.width = (total ? doneN/total*100 : 0) + '%';
+    const parts = [];
+    if(nNew)   parts.push('ไม่ผ่าน <b class="ng">' + nNew + ' ข้อ</b>');
+    if(nCarry) parts.push('รอซ่อม <b class="w">' + nCarry + ' ข้อ</b>');
+    $('#foot-status').innerHTML = doneN < total
+      ? ('เหลืออีก ' + (total-doneN) + ' ข้อ • <u>แตะเพื่อไปข้อที่ยังไม่ตรวจ</u>')
+      : (parts.length ? parts.join(' • ') : '✓ ตรวจครบ ผ่านทุกข้อ');
+    $('#btn-save').disabled = doneN < total || state.saving;
+  }
+  $('#foot-status').addEventListener('click', ()=>{
+    const n = firstUnanswered();
+    if(n) document.getElementById('it-'+n.id).scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  // ===== บันทึก =====
   $('#btn-save').addEventListener('click', async ()=>{
     if(state.saving) return;
-    const missingDetail = state.items.filter(i=>{
-      const a = state.answers[i.id];
-      return a && a.result==='fail' && !(a.detail||'').trim();
-    });
-    if(missingDetail.length){
-      toast('กรอกรายละเอียดข้อ ' + missingDetail.map(i=>i.code).join(', '));
-      document.getElementById('it-'+missingDetail[0].id).scrollIntoView({block:'center'});
+    const A = i => state.answers[i.id];
+    const missing = state.items.filter(i=> A(i) && A(i).result==='fail' && !A(i).mode && !(A(i).detail||'').trim());
+    if(missing.length){
+      toast('กรอกรายละเอียดข้อ ' + missing.map(i=>i.code).join(', '));
+      document.getElementById('it-'+missing[0].id).scrollIntoView({ behavior:'smooth', block:'start' });
       return;
     }
     state.saving = true; $('#btn-save').disabled = true; $('#btn-save').textContent = 'กำลังบันทึก…';
     try{
-      const fails = state.items.filter(i=> state.answers[i.id].result==='fail');
-      const ins = await sb.from('inspections').insert({
-        employee_id: state.emp.id,
-        line_user_id: state.user.userId,
-        inspector_name: state.emp.first_name + ' ' + state.emp.last_name,
-        vehicle_number: state.plate,
-        total_items: state.items.length,
-        fail_count: fails.length,
-        status: fails.length ? 'fail' : 'pass',
-        other_note: $('#other').value.trim() || null
-      }).select().single();
-      if(ins.error) throw ins.error;
-      const inspId = ins.data.id;
+      const newFails = state.items.filter(i=> A(i).result==='fail' && !A(i).mode);
+      const carried  = state.items.filter(i=> A(i).mode==='carry');
+      const fixed    = state.items.filter(i=> A(i).mode==='fixed');
+      const failN    = newFails.length + carried.length;
+      const who      = state.emp.first_name + ' ' + state.emp.last_name;
+      const now      = new Date().toISOString();
+      const inspId   = uuid();
 
-      const rows = state.items.map(i=>({
-        inspection_id: inspId, item_id: i.id, item_code: i.code, item_label: i.label,
-        section_name: i.section_name, sort_order: i.sort_order,
-        result: state.answers[i.id].result,
-        detail: (state.answers[i.id].detail||'').trim() || null
-      }));
-      const res = await sb.from('inspection_results').insert(rows).select('id,item_id');
-      if(res.error) throw res.error;
-      const map = {}; res.data.forEach(r=> map[r.item_id] = r.id);
+      // สร้าง id ล่วงหน้า เพื่อผูกผลรายข้อ ↔ งานซ่อม และอัปโหลดรูปพร้อมกันได้
+      const rid = {}, did = {};
+      state.items.forEach(i=>{ rid[i.id] = uuid(); });
+      newFails.forEach(i=>{ did[i.id] = uuid(); });
 
-      const photoRows = [];
-      for(const i of fails){
-        const ps = state.answers[i.id].photos;
-        for(let k=0;k<ps.length;k++){
-          const path = inspId + '/' + i.code.replace('.','_') + '_' + (k+1) + '_' + Date.now() + '.jpg';
-          const up = await sb.storage.from(C.BUCKET).upload(path, ps[k], { contentType:'image/jpeg', upsert:true });
+      // 1) อัปโหลดรูปทั้งหมดพร้อมกัน (เร็วกว่าทีละรูป)
+      $('#btn-save').textContent = 'กำลังอัปโหลดรูป…';
+      const uploads = [];
+      newFails.forEach(i=> (A(i).photos||[]).forEach((blob,k)=>{
+        const path = inspId + '/' + i.code.replace('.','_') + '_' + (k+1) + '_' + Date.now() + '.jpg';
+        uploads.push(sb.storage.from(C.BUCKET).upload(path, blob, { contentType:'image/jpeg', upsert:true }).then(up=>{
           if(up.error) throw up.error;
-          const { data:pub } = sb.storage.from(C.BUCKET).getPublicUrl(path);
-          photoRows.push({ result_id: map[i.id], inspection_id: inspId, path, url: pub.publicUrl });
-        }
-      }
-      if(photoRows.length){
-        const ph = await sb.from('inspection_photos').insert(photoRows);
-        if(ph.error) throw ph.error;
-      }
+          return { result_id: rid[i.id], inspection_id: inspId, path, url: sb.storage.from(C.BUCKET).getPublicUrl(path).data.publicUrl };
+        }));
+      }));
+      const photoRows = await Promise.all(uploads);
 
-      state.lastId = inspId;
-      if(fails.length && C.NOTIFY_ENABLED){
-        // ไม่รอผล — ถ้าแจ้งเตือนล้ม ข้อมูลตรวจก็ยังบันทึกครบ
+      // 2) ใบตรวจ
+      $('#btn-save').textContent = 'กำลังบันทึก…';
+      const ins = await sb.from('inspections').insert({
+        id: inspId, employee_id: state.emp.id, line_user_id: state.user.userId, inspector_name: who,
+        vehicle_number: state.plate, total_items: state.items.length, fail_count: failN,
+        status: failN ? 'fail' : 'pass', other_note: $('#other').value.trim() || null
+      });
+      if(ins.error) throw ins.error;
+
+      // 3) ผลรายข้อ
+      const rows = state.items.map(i=>{
+        const a = A(i), df = state.defects[i.id], note = (a.note||'').trim();
+        let detail = (a.detail||'').trim() || null, defect_id = null, is_new = null;
+        if(a.mode==='carry'){ defect_id = df.id; is_new = false; detail = 'รอซ่อม (แจ้ง ' + thDate(df.first_date) + ')' + (note ? ' — ' + note : ''); }
+        else if(a.mode==='fixed'){ defect_id = df.id; is_new = false; detail = 'ซ่อมเสร็จแล้ว' + (note ? ' — ' + note : ''); }
+        else if(a.result==='fail'){ defect_id = did[i.id]; is_new = true; }
+        return { id: rid[i.id], inspection_id: inspId, item_id: i.id, item_code: i.code, item_label: i.label,
+                 section_name: i.section_name, sort_order: i.sort_order, result: a.result, detail, defect_id, is_new_defect: is_new };
+      });
+      const res = await sb.from('inspection_results').insert(rows);
+      if(res.error) throw res.error;
+
+      // 4) รูป + งานซ่อม ทำพร้อมกัน
+      const jobs = [];
+      if(photoRows.length) jobs.push(sb.from('inspection_photos').insert(photoRows).then(r=>{ if(r.error) throw r.error; }));
+
+      const newDefects = newFails.map(i=>({
+        id: did[i.id], vehicle_number: state.plate, item_id: i.id, item_code: i.code, item_label: i.label,
+        section_name: i.section_name, first_detail: (A(i).detail||'').trim(), first_inspection_id: inspId,
+        first_result_id: rid[i.id], reported_by: who, first_reported_at: now, first_date: bkkDate(),
+        last_seen_at: now, last_inspection_id: inspId
+      }));
+      if(newDefects.length) jobs.push(sb.from('defects').insert(newDefects).then(async r=>{
+        if(!r.error) return;
+        // มีคนเปิดงานข้อเดียวกันไปก่อน (ตรวจพร้อมกัน) → ใส่ทีละแถว ข้ามแถวที่ซ้ำ
+        for(const row of newDefects){
+          const one = await sb.from('defects').insert(row);
+          if(one.error && one.error.code !== '23505') throw one.error;
+        }
+      }));
+      carried.forEach(i=>{
+        const df = state.defects[i.id];
+        jobs.push(sb.from('defects').update({ last_seen_at: now, last_inspection_id: inspId, seen_count: (df.seen_count||1) + 1 })
+          .eq('id', df.id).eq('status','open').then(r=>{ if(r.error) throw r.error; }));
+      });
+      fixed.forEach(i=>{
+        const df = state.defects[i.id];
+        jobs.push(sb.from('defects').update({ status:'fixed', fixed_at: now, fixed_date: bkkDate(), fixed_by: who,
+          fixed_source:'driver', fixed_note: (A(i).note||'').trim() || null, fixed_inspection_id: inspId })
+          .eq('id', df.id).eq('status','open').then(r=>{ if(r.error) throw r.error; }));
+      });
+      await Promise.all(jobs);
+
+      // 5) แจ้งเตือนกลุ่ม (เฉพาะข้อเสียใหม่ / ไม่รอผล)
+      if(newFails.length && C.NOTIFY_ENABLED){
         sb.functions.invoke('notify-fail', { body:{ inspection_id: inspId } })
           .then(r=>{ if(r.error) console.warn('notify error', r.error); })
           .catch(err=> console.warn('notify error', err));
       }
-      state.lastFails = fails.map(i=>({ code:i.code, label:i.label, detail:state.answers[i.id].detail }));
-      done(fails.length);
+      state.summary = {
+        newFails: newFails.map(i=>({ code:i.code, label:i.label, detail:A(i).detail })),
+        carried:  carried.map(i=>({ code:i.code, label:i.label, days: daysBetween(state.defects[i.id].first_date, bkkDate()) })),
+        fixed:    fixed.map(i=>({ code:i.code, label:i.label, days: daysBetween(state.defects[i.id].first_date, bkkDate()) }))
+      };
+      const rk = 'recent:' + state.user.userId;
+      cache.set(rk, [state.plate, ...(cache.get(rk)||[]).filter(v=>v!==state.plate)].slice(0,6));
+      done();
     }catch(e){
-      toast('บันทึกไม่สำเร็จ: ' + (e.message||e));
+      toast('บันทึกไม่สำเร็จ: ' + (e.message||e), 5000);
     }finally{
       state.saving = false; $('#btn-save').textContent = 'บันทึกผลการตรวจ'; updateFoot();
     }
   });
 
-  function done(nFail){
-    $('#done-icon').textContent = nFail ? '⚠️' : '✅';
-    $('#done-title').textContent = nFail ? ('พบไม่ผ่าน ' + nFail + ' ข้อ') : 'ตรวจผ่านทั้งหมด';
-    $('#done-sub').textContent = 'รถเบอร์ ' + state.plate + ' • ' + new Date().toLocaleString('th-TH');
+  function done(){
+    const S = state.summary;
+    const bad = S.newFails.length + S.carried.length;
+    $('#done-icon').textContent = bad ? '⚠️' : '✅';
+    $('#done-title').textContent = S.newFails.length ? ('พบไม่ผ่าน ' + S.newFails.length + ' ข้อ')
+      : S.carried.length ? ('ยังรอซ่อม ' + S.carried.length + ' ข้อ') : 'ตรวจผ่านทั้งหมด';
+    $('#done-sub').textContent = 'รถเบอร์ ' + state.plate + ' • บันทึกเมื่อ ' + new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) + ' น.';
+    const row = (h, sub, color)=> '<div class="done-row"><b style="color:'+color+'">'+h+'</b>'+(sub ? '<div class="s">'+esc(sub)+'</div>' : '')+'</div>';
+    let html = '';
+    if(S.newFails.length) html += '<h2 style="margin-bottom:4px">ไม่ผ่าน → ส่งเข้ารายการรอซ่อมแล้ว</h2>' +
+      S.newFails.map(f=> row(esc(f.code+' '+f.label), f.detail, 'var(--fail)')).join('');
+    if(S.carried.length)  html += '<h2 style="margin:16px 0 4px">ยังรอซ่อม</h2>' +
+      S.carried.map(f=> row(esc(f.code+' '+f.label), 'รอมาแล้ว ' + f.days + ' วัน', 'var(--warn)')).join('');
+    if(S.fixed.length)    html += '<h2 style="margin:16px 0 4px">ซ่อมเสร็จแล้ว</h2>' +
+      S.fixed.map(f=> row(esc(f.code+' '+f.label), 'รอซ่อม ' + f.days + ' วัน', 'var(--pass)')).join('');
     const box = $('#done-fails');
-    if(nFail){
-      box.innerHTML = state.lastFails.map(f=>
-        '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>'+f.code+'</b> '+f.label+
-        '<div style="color:var(--muted);font-size:14px">'+(f.detail||'')+'</div></div>').join('');
-      box.classList.remove('hide'); $('#btn-repair').classList.remove('hide');
-    }else{ box.classList.add('hide'); $('#btn-repair').classList.add('hide'); }
+    box.innerHTML = html; box.classList.toggle('hide', !html);
+    $('#btn-close').classList.toggle('hide', !(C.LIFF_ID && window.liff && liff.isInClient && liff.isInClient()));
     show('page-done');
   }
-  $('#btn-repair').addEventListener('click', ()=> toast('ระบบแจ้งซ่อมจะเปิดใช้ในเฟส 2'));
   $('#btn-again').addEventListener('click', goVehicle);
+  $('#btn-close').addEventListener('click', ()=>{ try{ liff.closeWindow(); }catch(e){} });
 
   init();
 })();
