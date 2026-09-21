@@ -95,6 +95,9 @@
   .status{font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center}
   .status b.ng{color:var(--fail)}
 
+  .vinfo{margin-top:10px;font-size:14px;min-height:21px;text-align:center}
+  .vinfo.ok{color:var(--pass);font-weight:600} .vinfo.ng{color:var(--fail);font-weight:600}
+  .admin-link{display:block;text-align:center;margin-top:36px;color:var(--muted);font-size:14px;text-decoration:underline;text-underline-offset:3px}
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#16211C;color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;z-index:60;max-width:88%;text-align:center}
   .hide{display:none!important}
   .center{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -133,9 +136,11 @@
   <div class="card">
     <label class="fld" for="plate">เบอร์รถ 3 หลัก</label>
     <input id="plate" class="plate" type="tel" inputmode="numeric" maxlength="3" placeholder="000">
+    <div class="vinfo" id="vinfo"></div>
     <div class="chips" id="recent"></div>
   </div>
   <button class="btn" id="btn-start" disabled>เริ่มตรวจรถ</button>
+  <a class="admin-link" href="./admin.html">เข้าหน้าแอดมิน</a>
 </section>
 
 <!-- 3. รายการตรวจ -->
@@ -184,7 +189,7 @@
   const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
   const $ = s => document.querySelector(s);
 
-  const state = { user:null, emp:null, items:[], answers:{}, plate:'', saving:false, lastFails:[], lastId:null };
+  const state = { user:null, emp:null, items:[], vehicles:{}, answers:{}, plate:'', saving:false, lastFails:[], lastId:null };
 
   function show(id){
     ['loading','page-reg','page-vehicle','page-check','page-done'].forEach(p=>{
@@ -226,6 +231,9 @@
       const it = await sb.from('checklist_items').select('*').eq('active', true).order('sort_order');
       if(it.error) throw it.error;
       state.items = it.data || [];
+      const vs = await sb.from('vehicles').select('*').eq('active', true);
+      if(vs.error) throw vs.error;
+      (vs.data||[]).forEach(v=> state.vehicles[v.vehicle_number] = v);
       if(data){ state.emp = data; goVehicle(); } else { show('page-reg'); }
     }catch(e){
       fail('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (e.message||e));
@@ -251,7 +259,7 @@
     const name = state.emp.first_name + ' ' + state.emp.last_name;
     $('#hello').textContent = 'สวัสดี ' + state.emp.first_name;
     $('#hello-sub').textContent = 'กรอกเบอร์รถที่จะตรวจ (' + name + ')';
-    $('#plate').value = ''; $('#btn-start').disabled = true;
+    $('#plate').value = ''; checkPlate('');
     show('page-vehicle');
     $('#plate').focus();
     const { data } = await sb.from('inspections').select('vehicle_number')
@@ -261,13 +269,29 @@
     seen.forEach(v=>{
       const b = document.createElement('button');
       b.className='chip'; b.type='button'; b.textContent = v;
-      b.onclick = ()=>{ $('#plate').value = v; $('#btn-start').disabled = false; };
+      b.onclick = ()=>{ $('#plate').value = v; checkPlate(v); };
       box.appendChild(b);
     });
   }
+  function checkPlate(v){
+    const info = $('#vinfo');
+    info.className = 'vinfo'; info.textContent = '';
+    if(v.length !== 3){ $('#btn-start').disabled = true; return; }
+    const hasList = Object.keys(state.vehicles).length > 0;
+    const car = state.vehicles[v];
+    if(hasList && !car){
+      info.className = 'vinfo ng'; info.textContent = 'ไม่พบรถเบอร์ ' + v + ' ในระบบ ตรวจเบอร์อีกครั้ง หรือแจ้งแอดมิน';
+      $('#btn-start').disabled = true; return;
+    }
+    if(car){
+      info.className = 'vinfo ok';
+      info.textContent = [car.plate ? 'ทะเบียน ' + car.plate : '', car.vehicle_type||''].filter(Boolean).join(' • ') || 'พบรถในระบบ';
+    }
+    $('#btn-start').disabled = false;
+  }
   $('#plate').addEventListener('input', e=>{
     e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
-    $('#btn-start').disabled = e.target.value.length !== 3;
+    checkPlate(e.target.value);
   });
   $('#btn-start').addEventListener('click', ()=>{
     state.plate = $('#plate').value;
@@ -450,6 +474,12 @@
       }
 
       state.lastId = inspId;
+      if(fails.length && C.NOTIFY_ENABLED){
+        // ไม่รอผล — ถ้าแจ้งเตือนล้ม ข้อมูลตรวจก็ยังบันทึกครบ
+        sb.functions.invoke('notify-fail', { body:{ inspection_id: inspId } })
+          .then(r=>{ if(r.error) console.warn('notify error', r.error); })
+          .catch(err=> console.warn('notify error', err));
+      }
       state.lastFails = fails.map(i=>({ code:i.code, label:i.label, detail:state.answers[i.id].detail }));
       done(fails.length);
     }catch(e){
