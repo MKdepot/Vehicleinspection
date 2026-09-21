@@ -17,36 +17,64 @@
   body{margin:0;font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;
        padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
-  h1{font-size:22px;margin:0 0 16px}
+  h1{font-size:22px;margin:0}
+  h2{font-size:17px;margin:0 0 4px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
   label.fld{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:var(--muted)}
-  input,select,button{font:inherit}
-  input,select{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;width:100%;color:var(--ink)}
+  input,select,button,textarea{font:inherit}
+  input,select,textarea{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;width:100%;color:var(--ink)}
+  textarea{min-height:110px}
+  input[type=checkbox]{width:20px;height:20px;accent-color:var(--pass)}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
   .btn{background:var(--pass);color:#fff;border:0;border-radius:9px;padding:10px 16px;font-weight:600;cursor:pointer}
   .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:6px 12px;font-size:13px}
   .btn:disabled{opacity:.5}
+  button:focus-visible,input:focus,select:focus,textarea:focus{outline:3px solid #9ED3BC;outline-offset:1px}
   .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-  .tabs button{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 18px;font-weight:600;cursor:pointer;color:var(--muted)}
+  .tabs button{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:600;cursor:pointer;color:var(--muted)}
   .tabs button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tbl{overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:14px}
   th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
   th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
-  tbody tr:hover{background:#F7FAF8;cursor:pointer}
-  .tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700}
+  tbody tr.click:hover{background:#F7FAF8;cursor:pointer}
+  .tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
   .tag.p{background:var(--pass-soft);color:var(--pass)} .tag.f{background:var(--fail-soft);color:var(--fail)}
   .plate{font-weight:700;letter-spacing:.08em;font-size:17px}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
-  .stat b{display:block;font-size:26px;line-height:1.2}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;cursor:default}
+  button.stat{cursor:pointer}
+  button.stat[aria-pressed=true]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .stat b{display:block;font-size:28px;line-height:1.2}
   .stat span{font-size:13px;color:var(--muted)}
+  .stat.f b{color:var(--fail)} .stat.p b{color:var(--pass)}
   .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
   .bar i{display:block;height:100%;background:var(--fail)}
   .mut{color:var(--muted)}
   .hide{display:none!important}
+
+  /* dashboard tiles */
+  .progress{height:10px;background:var(--line);border-radius:5px;overflow:hidden;display:flex;margin:4px 0 18px}
+  .progress i{display:block;height:100%}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+  .tile{border-radius:12px;padding:12px 10px;border:1.5px solid var(--line);background:#fff;text-align:center;font:inherit;color:var(--ink)}
+  .tile .no{font-size:24px;font-weight:700;letter-spacing:.08em;line-height:1.2}
+  .tile .st{font-size:12px;font-weight:600;margin-top:2px}
+  .tile .tm{font-size:12px;color:var(--muted)}
+  .tile.pass{background:var(--pass-soft);border-color:#B7DCC9;cursor:pointer}
+  .tile.pass .st{color:var(--pass)}
+  .tile.fail{background:var(--fail);border-color:var(--fail);color:#fff;cursor:pointer}
+  .tile.fail .tm{color:#FBDADA}
+  .tile.wait{border-style:dashed;background:transparent}
+  .tile.wait .st{color:var(--muted)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:14px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
   dialog{border:0;border-radius:14px;padding:0;max-width:720px;width:94%;background:var(--surface)}
   dialog::backdrop{background:rgba(0,0,0,.5)}
-  .dh{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface)}
+  .dh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line)}
   .db{padding:16px;max-height:72vh;overflow:auto}
   .row{padding:10px 0;border-bottom:1px solid var(--line)}
   .row.f{background:var(--fail-soft);border-radius:8px;padding:12px;margin:8px 0;border-bottom:0}
@@ -59,50 +87,80 @@
 <body>
 
 <div id="gate" class="wrap">
-  <h1>หน้าแอดมิน</h1>
+  <h1 style="margin-bottom:16px">หน้าแอดมิน</h1>
   <div class="card">
     <label class="fld" for="pin">รหัสผ่าน</label>
     <input id="pin" type="password" inputmode="numeric" placeholder="••••">
     <button class="btn" id="btn-pin" style="width:100%;margin-top:12px">เข้าสู่ระบบ</button>
-    <p id="pin-err" class="mut hide" style="color:var(--fail);font-size:13px">รหัสไม่ถูกต้อง</p>
+    <p id="pin-err" class="hide" style="color:var(--fail);font-size:13px">รหัสไม่ถูกต้อง</p>
   </div>
+  <a href="./index.html" class="mut" style="font-size:14px">กลับหน้าตรวจรถ</a>
 </div>
 
 <main id="app" class="wrap hide">
-  <h1>ตรวจสอบการตรวจรถ</h1>
-
-  <div class="card">
-    <div class="grid">
-      <div><label class="fld" for="f-from">ตั้งแต่วันที่</label><input id="f-from" type="date"></div>
-      <div><label class="fld" for="f-to">ถึงวันที่</label><input id="f-to" type="date"></div>
-      <div><label class="fld" for="f-plate">เบอร์รถ</label>
-        <select id="f-plate"><option value="">ทุกคัน</option></select></div>
-      <div><label class="fld" for="f-status">ผลการตรวจ</label>
-        <select id="f-status"><option value="">ทั้งหมด</option><option value="fail">เฉพาะที่ไม่ผ่าน</option><option value="pass">เฉพาะที่ผ่าน</option></select></div>
-      <div><button class="btn" id="btn-load" style="width:100%">ดูข้อมูล</button></div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn ghost" data-quick="today">วันนี้</button>
-      <button class="btn ghost" data-quick="7">7 วันล่าสุด</button>
-      <button class="btn ghost" data-quick="month">เดือนนี้</button>
-      <button class="btn ghost" data-quick="lastmonth">เดือนที่แล้ว</button>
-    </div>
+  <div class="top">
+    <h1>ระบบตรวจรถ</h1>
+    <a href="./index.html" class="btn ghost sm" style="text-decoration:none">หน้าตรวจรถ</a>
   </div>
 
-  <div class="stats" id="stats"></div>
-
   <div class="tabs" role="tablist">
-    <button role="tab" aria-selected="true"  data-tab="insp">รายการตรวจ</button>
+    <button role="tab" aria-selected="true"  data-tab="day">ภาพรวมรายวัน</button>
+    <button role="tab" aria-selected="false" data-tab="insp">ประวัติการตรวจ</button>
     <button role="tab" aria-selected="false" data-tab="item">แยกตามรายการตรวจ</button>
     <button role="tab" aria-selected="false" data-tab="veh">แยกตามคัน</button>
     <button role="tab" aria-selected="false" data-tab="exp">ส่งออกข้อมูล</button>
+    <button role="tab" aria-selected="false" data-tab="cars">จัดการรถ</button>
   </div>
 
-  <div class="card" id="pane-insp"></div>
-  <div class="card hide" id="pane-item"></div>
-  <div class="card hide" id="pane-veh"></div>
+  <!-- ===== ภาพรวมรายวัน ===== -->
+  <section id="pane-day">
+    <div class="card">
+      <div class="grid">
+        <div><label class="fld" for="d-date">วันที่</label><input id="d-date" type="date"></div>
+        <div><button class="btn ghost" id="d-today" style="width:100%">วันนี้</button></div>
+        <div><button class="btn" id="d-load" style="width:100%">รีเฟรช</button></div>
+      </div>
+      <p class="mut" id="d-updated" style="font-size:13px;margin:10px 0 0"></p>
+    </div>
+    <div class="stats" id="d-stats"></div>
+    <div class="card">
+      <div class="progress" id="d-progress"></div>
+      <div class="tiles" id="d-tiles"></div>
+      <div class="legend">
+        <span><i style="background:var(--pass-soft);border:1px solid #B7DCC9"></i>ผ่าน</span>
+        <span><i style="background:var(--fail)"></i>ไม่ผ่าน</span>
+        <span><i style="border:1.5px dashed var(--muted)"></i>ยังไม่ตรวจ</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ตัวกรองช่วงวันที่ (ใช้กับแท็บประวัติ/รายการ/คัน/ส่งออก) ===== -->
+  <div id="range" class="hide">
+    <div class="card">
+      <div class="grid">
+        <div><label class="fld" for="f-from">ตั้งแต่วันที่</label><input id="f-from" type="date"></div>
+        <div><label class="fld" for="f-to">ถึงวันที่</label><input id="f-to" type="date"></div>
+        <div><label class="fld" for="f-plate">เบอร์รถ</label>
+          <select id="f-plate"><option value="">ทุกคัน</option></select></div>
+        <div><label class="fld" for="f-status">ผลการตรวจ</label>
+          <select id="f-status"><option value="">ทั้งหมด</option><option value="fail">เฉพาะที่ไม่ผ่าน</option><option value="pass">เฉพาะที่ผ่าน</option></select></div>
+        <div><button class="btn" id="btn-load" style="width:100%">ดูข้อมูล</button></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost sm" data-quick="today">วันนี้</button>
+        <button class="btn ghost sm" data-quick="7">7 วันล่าสุด</button>
+        <button class="btn ghost sm" data-quick="month">เดือนนี้</button>
+        <button class="btn ghost sm" data-quick="lastmonth">เดือนที่แล้ว</button>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="card tbl hide" id="pane-insp"></div>
+  <div class="card tbl hide" id="pane-item"></div>
+  <div class="card tbl hide" id="pane-veh"></div>
   <div class="card hide" id="pane-exp">
-    <h2 style="margin:0 0 4px;font-size:17px">ส่งออกเป็นไฟล์ CSV (เปิดด้วย Excel ได้)</h2>
+    <h2>ส่งออกเป็นไฟล์ CSV (เปิดด้วย Excel ได้)</h2>
     <p class="mut" style="margin:0 0 16px;font-size:14px">ใช้ช่วงวันที่ด้านบนเป็นเกณฑ์</p>
     <div class="grid">
       <div><button class="btn" id="ex-sum" style="width:100%">สรุปรายใบตรวจ (ทุกคัน)</button></div>
@@ -111,14 +169,25 @@
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
     <div class="grid">
-      <div><label class="fld" for="ex-plate">เลือกคัน</label><select id="ex-plate"></select></div>
+      <div><label class="fld" for="ex-plate">เลือกคัน</label><select id="ex-plate"><option value="">— เลือก —</option></select></div>
       <div><button class="btn ghost" id="ex-one" style="width:100%">ส่งออกรายคัน</button></div>
     </div>
   </div>
+
+  <!-- ===== จัดการรถ ===== -->
+  <section id="pane-cars" class="hide">
+    <div class="card">
+      <h2>เพิ่มรถ</h2>
+      <p class="mut" style="margin:0 0 10px;font-size:14px">บรรทัดละ 1 คัน รูปแบบ <b>เบอร์รถ, ทะเบียน, ประเภท</b> — ถ้าเบอร์ซ้ำจะอัปเดตข้อมูลเดิม</p>
+      <textarea id="c-bulk" placeholder="101, 70-1234, เทรลเลอร์&#10;102, 70-5678, สิบล้อ&#10;103"></textarea>
+      <button class="btn" id="c-add" style="margin-top:10px">บันทึกรายชื่อรถ</button>
+    </div>
+    <div class="card tbl" id="c-list"></div>
+  </section>
 </main>
 
 <dialog id="dlg">
-  <div class="dh"><b id="dlg-title"></b><button class="btn ghost" onclick="document.getElementById('dlg').close()">ปิด</button></div>
+  <div class="dh"><b id="dlg-title"></b><button class="btn ghost sm" onclick="document.getElementById('dlg').close()">ปิด</button></div>
   <div class="db" id="dlg-body"></div>
 </dialog>
 
@@ -130,10 +199,21 @@
   const C = window.CONFIG;
   const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
   const $ = s => document.querySelector(s);
-  let DATA = { insp:[], res:{}, photos:{} };   // res: inspection_id -> rows, photos: result_id -> rows
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  let DATA = { insp:[], res:{}, photos:{} };     // ชุดข้อมูลแท็บช่วงวันที่
+  let DAY  = { insp:[], res:{}, photos:{} };     // ชุดข้อมูลแท็บรายวัน
+  let VEH  = [];                                 // ทะเบียนรถทั้งหมด
+  let dayFilter = 'all';
+  let rangeLoaded = false, timer = null;
 
   // ---------- gate ----------
-  function open(){ $('#gate').classList.add('hide'); $('#app').classList.remove('hide'); setQuick('month'); load(); }
+  function open(){
+    $('#gate').classList.add('hide'); $('#app').classList.remove('hide');
+    $('#d-date').value = today(); setQuick('month');
+    loadVehicles().then(loadDay);
+    timer = setInterval(()=>{ if(!$('#pane-day').classList.contains('hide') && $('#d-date').value===today()) loadDay(); }, 60000);
+  }
   $('#btn-pin').onclick = ()=>{
     if($('#pin').value === String(C.ADMIN_PIN)){ sessionStorage.setItem('vi_admin','1'); open(); }
     else $('#pin-err').classList.remove('hide');
@@ -141,8 +221,103 @@
   $('#pin').addEventListener('keydown', e=>{ if(e.key==='Enter') $('#btn-pin').click(); });
   if(sessionStorage.getItem('vi_admin')==='1') open();
 
-  // ---------- date helpers ----------
+  // ---------- helpers ----------
   const iso = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const today = ()=> iso(new Date());
+  const chunk = (a,n)=> a.reduce((o,v,i)=>(i%n ? o[o.length-1].push(v) : o.push([v]), o), []);
+  const fmt = ts => new Date(ts).toLocaleString('th-TH',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const hm  = ts => new Date(ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  const stat = (v,l,cls,key)=> key
+    ? '<button class="stat '+(cls||'')+'" data-f="'+key+'" aria-pressed="'+(dayFilter===key)+'"><b>'+v+'</b><span>'+l+'</span></button>'
+    : '<div class="stat '+(cls||'')+'"><b>'+v+'</b><span>'+l+'</span></div>';
+
+  // ดึงผลรายข้อ + รูป แยกตาราง แล้วจับคู่ด้วย Map (เสถียรกว่า join)
+  async function withDetails(insp){
+    const set = { insp, res:{}, photos:{} };
+    const ids = insp.map(i=>i.id);
+    for(const part of chunk(ids, 100)){
+      const r = await sb.from('inspection_results').select('*').in('inspection_id', part).order('sort_order');
+      if(r.error) throw r.error;
+      r.data.forEach(x=> (set.res[x.inspection_id] = set.res[x.inspection_id] || []).push(x));
+      const p = await sb.from('inspection_photos').select('*').in('inspection_id', part);
+      if(p.error) throw p.error;
+      p.data.forEach(x=> (set.photos[x.result_id] = set.photos[x.result_id] || []).push(x));
+    }
+    return set;
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('[data-tab]').forEach(b=> b.onclick = ()=>{
+    const t = b.dataset.tab;
+    document.querySelectorAll('[data-tab]').forEach(x=> x.setAttribute('aria-selected', String(x===b)));
+    ['day','insp','item','veh','exp','cars'].forEach(k=> $('#pane-'+k).classList.toggle('hide', k!==t));
+    $('#range').classList.toggle('hide', !['insp','item','veh','exp'].includes(t));
+    if(t==='day') loadDay();
+    if(['insp','item','veh','exp'].includes(t) && !rangeLoaded) load();
+    if(t==='cars') renderCars();
+  });
+
+  // ================= ภาพรวมรายวัน =================
+  $('#d-today').onclick = ()=>{ $('#d-date').value = today(); loadDay(); };
+  $('#d-load').onclick = loadDay;
+  $('#d-date').onchange = loadDay;
+
+  async function loadDay(){
+    try{
+      const { data, error } = await sb.from('inspections').select('*')
+        .eq('inspect_date', $('#d-date').value).order('inspected_at', { ascending:false });
+      if(error) throw error;
+      DAY = await withDetails(data);
+      renderDay();
+      $('#d-updated').textContent = 'อัปเดตล่าสุด ' + new Date().toLocaleTimeString('th-TH') +
+        ($('#d-date').value===today() ? ' • รีเฟรชอัตโนมัติทุก 1 นาที' : '');
+    }catch(e){ alert('โหลดข้อมูลไม่สำเร็จ: ' + (e.message||e)); }
+  }
+
+  function renderDay(){
+    // ใช้ใบตรวจล่าสุดของแต่ละคันในวันนั้น
+    const latest = {};
+    DAY.insp.forEach(i=>{ if(!latest[i.vehicle_number]) latest[i.vehicle_number] = i; });
+    const active = VEH.filter(v=>v.active);
+    const tiles = active.map(v=>({ v:v.vehicle_number, car:v, i:latest[v.vehicle_number]||null }));
+    // รถที่ตรวจแต่ไม่อยู่ในทะเบียน
+    Object.keys(latest).forEach(k=>{ if(!active.find(v=>v.vehicle_number===k)) tiles.push({ v:k, car:null, i:latest[k] }); });
+    tiles.sort((a,b)=> a.v.localeCompare(b.v));
+
+    const total = active.length;
+    const done  = tiles.filter(t=>t.i && t.car).length;
+    const fail  = tiles.filter(t=>t.i && t.i.status==='fail').length;
+    const wait  = tiles.filter(t=>!t.i).length;
+    $('#d-stats').innerHTML =
+      stat(total,'รถทั้งหมด','', 'all') + stat(done,'ตรวจแล้ว','p','done') +
+      stat(wait,'ยังไม่ตรวจ','', 'wait') + stat(fail,'ตรวจไม่ผ่าน','f','fail');
+    document.querySelectorAll('#d-stats [data-f]').forEach(b=> b.onclick = ()=>{ dayFilter = b.dataset.f; renderDay(); });
+
+    const pct = n => total ? (n/total*100) : 0;
+    const passN = tiles.filter(t=>t.i && t.i.status==='pass' && t.car).length;
+    const failN = tiles.filter(t=>t.i && t.i.status==='fail' && t.car).length;
+    $('#d-progress').innerHTML = '<i style="width:'+pct(passN)+'%;background:var(--pass)"></i><i style="width:'+pct(failN)+'%;background:var(--fail)"></i>';
+
+    const shown = tiles.filter(t=>
+      dayFilter==='all' ? true :
+      dayFilter==='done' ? !!t.i :
+      dayFilter==='wait' ? !t.i :
+      (t.i && t.i.status==='fail'));
+    if(!VEH.length){
+      $('#d-tiles').innerHTML = '<div class="empty" style="grid-column:1/-1">ยังไม่มีทะเบียนรถ — เพิ่มได้ที่แท็บ “จัดการรถ”</div>'; return;
+    }
+    if(!shown.length){ $('#d-tiles').innerHTML = '<div class="empty" style="grid-column:1/-1">ไม่มีรถในกลุ่มนี้</div>'; return; }
+    $('#d-tiles').innerHTML = shown.map(t=>{
+      if(!t.i) return '<div class="tile wait"><div class="no">'+esc(t.v)+'</div><div class="st">ยังไม่ตรวจ</div><div class="tm">'+esc(t.car.vehicle_type||'')+'</div></div>';
+      const f = t.i.status==='fail';
+      return '<button class="tile '+(f?'fail':'pass')+'" data-id="'+t.i.id+'"><div class="no">'+esc(t.v)+'</div>'+
+        '<div class="st">'+(f ? 'ไม่ผ่าน '+t.i.fail_count+' ข้อ' : 'ผ่าน')+'</div>'+
+        '<div class="tm">'+hm(t.i.inspected_at)+(t.car?'':' • ไม่มีในทะเบียน')+'</div></button>';
+    }).join('');
+    document.querySelectorAll('#d-tiles [data-id]').forEach(b=> b.onclick = ()=> detail(b.dataset.id, DAY));
+  }
+
+  // ================= ช่วงวันที่ =================
   function setQuick(k){
     const now = new Date(); let a, b;
     if(k==='today'){ a=b=now; }
@@ -154,9 +329,6 @@
   document.querySelectorAll('[data-quick]').forEach(b=> b.onclick = ()=>{ setQuick(b.dataset.quick); load(); });
   $('#btn-load').onclick = load;
 
-  const chunk = (a,n)=> a.reduce((o,v,i)=>(i%n ? o[o.length-1].push(v) : o.push([v]), o), []);
-
-  // ---------- load (ดึงแยกตาราง แล้วจับคู่ด้วย Map — เสถียรกว่า join) ----------
   async function load(){
     $('#btn-load').disabled = true; $('#btn-load').textContent = 'กำลังโหลด…';
     try{
@@ -165,74 +337,39 @@
         .order('inspected_at', { ascending:false });
       if($('#f-plate').value)  q = q.eq('vehicle_number', $('#f-plate').value);
       if($('#f-status').value) q = q.eq('status', $('#f-status').value);
-      const { data:insp, error } = await q;
+      const { data, error } = await q;
       if(error) throw error;
-
-      const ids = insp.map(i=>i.id);
-      const res = [], photos = [];
-      for(const part of chunk(ids, 100)){
-        const r = await sb.from('inspection_results').select('*').in('inspection_id', part).order('sort_order');
-        if(r.error) throw r.error; res.push(...r.data);
-        const p = await sb.from('inspection_photos').select('*').in('inspection_id', part);
-        if(p.error) throw p.error; photos.push(...p.data);
-      }
-      DATA = { insp, res:{}, photos:{} };
-      res.forEach(r=> (DATA.res[r.inspection_id] = DATA.res[r.inspection_id] || []).push(r));
-      photos.forEach(p=> (DATA.photos[p.result_id] = DATA.photos[p.result_id] || []).push(p));
-      await fillPlates();
-      renderAll();
+      DATA = await withDetails(data);
+      rangeLoaded = true;
+      renderStats(); renderInsp(); renderItem(); renderVeh();
     }catch(e){ alert('โหลดข้อมูลไม่สำเร็จ: ' + (e.message||e)); }
     finally{ $('#btn-load').disabled = false; $('#btn-load').textContent = 'ดูข้อมูล'; }
   }
-
-  async function fillPlates(){
-    if($('#f-plate').options.length > 1) return;
-    const { data } = await sb.from('inspections').select('vehicle_number').limit(5000);
-    const list = [...new Set((data||[]).map(r=>r.vehicle_number))].sort();
-    list.forEach(v=>{
-      $('#f-plate').insertAdjacentHTML('beforeend', '<option>'+v+'</option>');
-      $('#ex-plate').insertAdjacentHTML('beforeend', '<option>'+v+'</option>');
-    });
-  }
-
-  // ---------- tabs ----------
-  document.querySelectorAll('[data-tab]').forEach(b=> b.onclick = ()=>{
-    document.querySelectorAll('[data-tab]').forEach(x=> x.setAttribute('aria-selected', String(x===b)));
-    ['insp','item','veh','exp'].forEach(t=> $('#pane-'+t).classList.toggle('hide', t!==b.dataset.tab));
-  });
-
-  function renderAll(){ renderStats(); renderInsp(); renderItem(); renderVeh(); }
 
   function renderStats(){
     const n = DATA.insp.length;
     const f = DATA.insp.filter(i=>i.status==='fail').length;
     const veh = new Set(DATA.insp.map(i=>i.vehicle_number)).size;
     const failItems = Object.values(DATA.res).flat().filter(r=>r.result==='fail').length;
-    $('#stats').innerHTML =
-      stat(n,'ใบตรวจทั้งหมด') + stat(veh,'จำนวนคัน') +
-      stat(f,'ใบที่มีข้อไม่ผ่าน') + stat(failItems,'ข้อที่ไม่ผ่านรวม');
+    $('#stats').innerHTML = stat(n,'ใบตรวจทั้งหมด') + stat(veh,'จำนวนคัน') + stat(f,'ใบที่มีข้อไม่ผ่าน','f') + stat(failItems,'ข้อที่ไม่ผ่านรวม','f');
   }
-  const stat = (v,l)=> '<div class="stat"><b>'+v+'</b><span>'+l+'</span></div>';
-
-  function fmt(ts){ return new Date(ts).toLocaleString('th-TH',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}); }
 
   function renderInsp(){
     const el = $('#pane-insp');
     if(!DATA.insp.length) return el.innerHTML = '<div class="empty">ไม่มีข้อมูลในช่วงวันที่ที่เลือก</div>';
     el.innerHTML = '<table><thead><tr><th>วัน–เวลา</th><th>เบอร์รถ</th><th>ผู้ตรวจ</th><th>ผล</th><th>ไม่ผ่าน</th><th>ความผิดปกติอื่น ๆ</th></tr></thead><tbody>'+
       DATA.insp.map(i=>
-        '<tr data-id="'+i.id+'"><td>'+fmt(i.inspected_at)+'</td>'+
-        '<td class="plate">'+i.vehicle_number+'</td><td>'+(i.inspector_name||'')+'</td>'+
+        '<tr class="click" data-id="'+i.id+'"><td>'+fmt(i.inspected_at)+'</td>'+
+        '<td class="plate">'+esc(i.vehicle_number)+'</td><td>'+esc(i.inspector_name)+'</td>'+
         '<td><span class="tag '+(i.status==='fail'?'f':'p')+'">'+(i.status==='fail'?'ไม่ผ่าน':'ผ่าน')+'</span></td>'+
-        '<td>'+(i.fail_count||0)+' ข้อ</td><td class="mut">'+(i.other_note||'–')+'</td></tr>').join('')+
+        '<td>'+(i.fail_count||0)+' ข้อ</td><td class="mut">'+esc(i.other_note||'–')+'</td></tr>').join('')+
       '</tbody></table>';
-    el.querySelectorAll('tr[data-id]').forEach(tr=> tr.onclick = ()=> detail(tr.dataset.id));
+    el.querySelectorAll('tr[data-id]').forEach(tr=> tr.onclick = ()=> detail(tr.dataset.id, DATA));
   }
 
   function renderItem(){
-    const rows = Object.values(DATA.res).flat();
     const by = {};
-    rows.forEach(r=>{
+    Object.values(DATA.res).flat().forEach(r=>{
       const k = r.item_code;
       by[k] = by[k] || { code:r.item_code, label:r.item_label, section:r.section_name, total:0, fail:0, items:[] };
       by[k].total++;
@@ -243,7 +380,7 @@
     if(!list.length) return el.innerHTML = '<div class="empty">ไม่มีข้อมูล</div>';
     el.innerHTML = '<table><thead><tr><th>ข้อ</th><th>รายการตรวจ</th><th>ตรวจ</th><th>ไม่ผ่าน</th><th style="width:130px">สัดส่วน</th></tr></thead><tbody>'+
       list.map(x=>
-        '<tr data-code="'+x.code+'"><td><b>'+x.code+'</b></td><td>'+x.label+'<div class="mut" style="font-size:12px">'+x.section+'</div></td>'+
+        '<tr class="click" data-code="'+esc(x.code)+'"><td><b>'+esc(x.code)+'</b></td><td>'+esc(x.label)+'<div class="mut" style="font-size:12px">'+esc(x.section)+'</div></td>'+
         '<td>'+x.total+'</td><td>'+(x.fail?'<b style="color:var(--fail)">'+x.fail+'</b>':'0')+'</td>'+
         '<td><div class="bar"><i style="width:'+Math.round(x.fail/x.total*100)+'%"></i></div></td></tr>').join('')+
       '</tbody></table>';
@@ -263,7 +400,7 @@
     const el = $('#pane-veh');
     if(!list.length) return el.innerHTML = '<div class="empty">ไม่มีข้อมูล</div>';
     el.innerHTML = '<table><thead><tr><th>เบอร์รถ</th><th>จำนวนครั้งที่ตรวจ</th><th>ใบที่มีข้อไม่ผ่าน</th><th>ข้อไม่ผ่านรวม</th><th>ตรวจล่าสุด</th></tr></thead><tbody>'+
-      list.map(x=> '<tr data-v="'+x.v+'"><td class="plate">'+x.v+'</td><td>'+x.n+'</td><td>'+x.fail+'</td>'+
+      list.map(x=> '<tr class="click" data-v="'+esc(x.v)+'"><td class="plate">'+esc(x.v)+'</td><td>'+x.n+'</td><td>'+x.fail+'</td>'+
         '<td>'+(x.items?'<b style="color:var(--fail)">'+x.items+'</b>':'0')+'</td><td>'+fmt(x.last)+'</td></tr>').join('')+
       '</tbody></table>';
     el.querySelectorAll('tr[data-v]').forEach(tr=> tr.onclick = ()=>{
@@ -274,22 +411,23 @@
   }
 
   // ---------- popup ----------
-  function shots(resultId){
-    const ps = DATA.photos[resultId] || [];
+  function shots(set, resultId){
+    const ps = set.photos[resultId] || [];
     if(!ps.length) return '';
-    return '<div class="shots">' + ps.map(p=>'<img src="'+p.url+'" alt="รูปประกอบ" onclick="window.open(this.src)">').join('') + '</div>';
+    return '<div class="shots">' + ps.map(p=>'<img src="'+esc(p.url)+'" alt="รูปประกอบ" onclick="window.open(this.src)">').join('') + '</div>';
   }
-  function detail(id){
-    const i = DATA.insp.find(x=>x.id===id);
-    const rows = DATA.res[id] || [];
+  function detail(id, set){
+    const i = set.insp.find(x=>x.id===id);
+    const rows = set.res[id] || [];
     $('#dlg-title').textContent = 'รถ ' + i.vehicle_number + ' • ' + fmt(i.inspected_at);
     $('#dlg-body').innerHTML =
-      '<p class="mut" style="margin-top:0">ผู้ตรวจ: '+(i.inspector_name||'-')+' • ไม่ผ่าน '+(i.fail_count||0)+' ข้อ'+
-      (i.other_note ? '<br>ความผิดปกติอื่น ๆ: '+i.other_note : '')+'</p>'+
+      '<p class="mut" style="margin-top:0">ผู้ตรวจ: '+esc(i.inspector_name||'-')+' • ไม่ผ่าน '+(i.fail_count||0)+' ข้อ'+
+      (i.notified_at ? ' • แจ้งเตือนกลุ่มแล้ว '+hm(i.notified_at) : '')+
+      (i.other_note ? '<br>ความผิดปกติอื่น ๆ: '+esc(i.other_note) : '')+'</p>'+
       rows.map(r=> r.result==='fail'
-        ? '<div class="row f"><b>'+r.item_code+' '+r.item_label+'</b> <span class="tag f">ไม่ผ่าน</span>'+
-          '<div style="margin-top:4px">'+(r.detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+ shots(r.id) +'</div>'
-        : '<div class="row"><span class="mut">'+r.item_code+'</span> '+r.item_label+' <span class="tag p">ผ่าน</span></div>'
+        ? '<div class="row f"><b>'+esc(r.item_code+' '+r.item_label)+'</b> <span class="tag f">ไม่ผ่าน</span>'+
+          '<div style="margin-top:4px">'+esc(r.detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+ shots(set, r.id) +'</div>'
+        : '<div class="row"><span class="mut">'+esc(r.item_code)+'</span> '+esc(r.item_label)+' <span class="tag p">ผ่าน</span></div>'
       ).join('');
     $('#dlg').showModal();
   }
@@ -298,45 +436,43 @@
     if(!x.items.length){ $('#dlg-body').innerHTML = '<div class="empty">ไม่มีรายการไม่ผ่านในช่วงนี้</div>'; return $('#dlg').showModal(); }
     $('#dlg-body').innerHTML = x.items.map(r=>{
       const i = DATA.insp.find(v=>v.id===r.inspection_id) || {};
-      return '<div class="row f"><b class="plate">'+(i.vehicle_number||'')+'</b> <span class="mut">'+fmt(i.inspected_at)+' • '+(i.inspector_name||'')+'</span>'+
-        '<div style="margin-top:4px">'+(r.detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+ shots(r.id) +'</div>';
+      return '<div class="row f"><b class="plate">'+esc(i.vehicle_number)+'</b> <span class="mut">'+fmt(i.inspected_at)+' • '+esc(i.inspector_name)+'</span>'+
+        '<div style="margin-top:4px">'+esc(r.detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+ shots(DATA, r.id) +'</div>';
     }).join('');
     $('#dlg').showModal();
   }
 
   // ---------- export ----------
   function csv(rows, name){
-    const esc = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
-    const body = rows.map(r=> r.map(esc).join(',')).join('\r\n');
-    const blob = new Blob(['\uFEFF' + body], { type:'text/csv;charset=utf-8;' });
+    const q = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+    const blob = new Blob(['\uFEFF' + rows.map(r=> r.map(q).join(',')).join('\r\n')], { type:'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = name + '_' + $('#f-from').value + '_ถึง_' + $('#f-to').value + '.csv';
-    a.click(); URL.revokeObjectURL(a.href);
+    a.click(); setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
   }
   function detailRows(filterFail, plate){
-    const head = ['วันที่','เวลา','เบอร์รถ','ผู้ตรวจ','ผลรวมของใบตรวจ','หมวด','ข้อ','รายการตรวจ','ผล','รายละเอียดที่พบ','จำนวนรูป','ลิงก์รูป','ความผิดปกติอื่น ๆ'];
-    const out = [head];
+    const out = [['วันที่','เวลา','เบอร์รถ','ทะเบียน','ผู้ตรวจ','ผลรวมของใบตรวจ','หมวด','ข้อ','รายการตรวจ','ผล','รายละเอียดที่พบ','จำนวนรูป','ลิงก์รูป','ความผิดปกติอื่น ๆ']];
     DATA.insp.filter(i=> !plate || i.vehicle_number===plate).forEach(i=>{
       const d = new Date(i.inspected_at);
+      const car = VEH.find(v=>v.vehicle_number===i.vehicle_number) || {};
       (DATA.res[i.id]||[]).forEach(r=>{
         if(filterFail && r.result!=='fail') return;
         const ps = DATA.photos[r.id] || [];
-        out.push([ d.toLocaleDateString('th-TH'), d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
-          i.vehicle_number, i.inspector_name, i.status==='fail'?'ไม่ผ่าน':'ผ่าน',
-          r.section_name, r.item_code, r.item_label, r.result==='fail'?'ไม่ผ่าน':'ผ่าน',
+        out.push([ d.toLocaleDateString('th-TH'), hm(i.inspected_at), i.vehicle_number, car.plate||'', i.inspector_name,
+          i.status==='fail'?'ไม่ผ่าน':'ผ่าน', r.section_name, r.item_code, r.item_label, r.result==='fail'?'ไม่ผ่าน':'ผ่าน',
           r.detail||'', ps.length, ps.map(p=>p.url).join(' | '), i.other_note||'' ]);
       });
     });
     return out;
   }
   $('#ex-sum').onclick = ()=>{
-    const out = [['วันที่','เวลา','เบอร์รถ','ผู้ตรวจ','ผล','จำนวนข้อไม่ผ่าน','ข้อที่ไม่ผ่าน','ความผิดปกติอื่น ๆ']];
+    const out = [['วันที่','เวลา','เบอร์รถ','ทะเบียน','ผู้ตรวจ','ผล','จำนวนข้อไม่ผ่าน','ข้อที่ไม่ผ่าน','ความผิดปกติอื่น ๆ']];
     DATA.insp.forEach(i=>{
-      const d = new Date(i.inspected_at);
+      const car = VEH.find(v=>v.vehicle_number===i.vehicle_number) || {};
       const f = (DATA.res[i.id]||[]).filter(r=>r.result==='fail').map(r=>r.item_code).join(', ');
-      out.push([ d.toLocaleDateString('th-TH'), d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
-        i.vehicle_number, i.inspector_name, i.status==='fail'?'ไม่ผ่าน':'ผ่าน', i.fail_count||0, f, i.other_note||'' ]);
+      out.push([ new Date(i.inspected_at).toLocaleDateString('th-TH'), hm(i.inspected_at), i.vehicle_number, car.plate||'',
+        i.inspector_name, i.status==='fail'?'ไม่ผ่าน':'ผ่าน', i.fail_count||0, f, i.other_note||'' ]);
     });
     csv(out, 'สรุปการตรวจรถ');
   };
@@ -346,6 +482,53 @@
     const p = $('#ex-plate').value;
     if(!p) return alert('เลือกเบอร์รถก่อน');
     csv(detailRows(false, p), 'ตรวจรถ_เบอร์'+p);
+  };
+
+  // ================= จัดการรถ =================
+  async function loadVehicles(){
+    const { data, error } = await sb.from('vehicles').select('*').order('vehicle_number');
+    if(error){ alert('โหลดทะเบียนรถไม่สำเร็จ: ' + error.message); return; }
+    VEH = data || [];
+    const opts = VEH.map(v=> '<option>'+esc(v.vehicle_number)+'</option>').join('');
+    $('#f-plate').innerHTML = '<option value="">ทุกคัน</option>' + opts;
+    $('#ex-plate').innerHTML = '<option value="">— เลือก —</option>' + opts;
+  }
+
+  function renderCars(){
+    const el = $('#c-list');
+    if(!VEH.length) return el.innerHTML = '<div class="empty">ยังไม่มีรถในระบบ</div>';
+    el.innerHTML = '<table><thead><tr><th>เบอร์รถ</th><th>ทะเบียน</th><th>ประเภท</th><th>ใช้งาน</th><th></th></tr></thead><tbody>'+
+      VEH.map(v=> '<tr><td class="plate">'+esc(v.vehicle_number)+'</td><td>'+esc(v.plate||'–')+'</td><td>'+esc(v.vehicle_type||'–')+'</td>'+
+        '<td><input type="checkbox" data-act="'+esc(v.vehicle_number)+'" '+(v.active?'checked':'')+' aria-label="ใช้งานรถ '+esc(v.vehicle_number)+'"></td>'+
+        '<td><button class="btn ghost sm" data-del="'+esc(v.vehicle_number)+'">ลบ</button></td></tr>').join('')+
+      '</tbody></table><p class="mut" style="font-size:13px;margin:10px 0 0">ติ๊ก “ใช้งาน” ออก = ไม่นับใน dashboard และ พนง. จะกรอกเบอร์นี้ไม่ได้ (ประวัติเดิมยังอยู่)</p>';
+    el.querySelectorAll('[data-act]').forEach(cb=> cb.onchange = async ()=>{
+      const { error } = await sb.from('vehicles').update({ active: cb.checked }).eq('vehicle_number', cb.dataset.act);
+      if(error){ alert(error.message); cb.checked = !cb.checked; return; }
+      await loadVehicles();
+    });
+    el.querySelectorAll('[data-del]').forEach(b=> b.onclick = async ()=>{
+      if(!confirm('ลบรถเบอร์ ' + b.dataset.del + ' ออกจากทะเบียน? (ประวัติการตรวจยังอยู่)')) return;
+      const { error } = await sb.from('vehicles').delete().eq('vehicle_number', b.dataset.del);
+      if(error) return alert(error.message);
+      await loadVehicles(); renderCars();
+    });
+  }
+
+  $('#c-add').onclick = async ()=>{
+    const rows = [], bad = [];
+    $('#c-bulk').value.split('\n').map(l=>l.trim()).filter(Boolean).forEach(l=>{
+      const [no, plate, type] = l.split(/[,\t]/).map(s=> (s||'').trim());
+      if(!/^\d{3}$/.test(no)) return bad.push(l);
+      rows.push({ vehicle_number:no, plate:plate||null, vehicle_type:type||null, active:true });
+    });
+    if(bad.length) return alert('เบอร์รถต้องเป็นตัวเลข 3 หลัก บรรทัดที่ผิด:\n' + bad.join('\n'));
+    if(!rows.length) return alert('ยังไม่ได้กรอกข้อมูลรถ');
+    const { error } = await sb.from('vehicles').upsert(rows, { onConflict:'vehicle_number' });
+    if(error) return alert('บันทึกไม่สำเร็จ: ' + error.message);
+    $('#c-bulk').value = '';
+    await loadVehicles(); renderCars();
+    alert('บันทึกรถ ' + rows.length + ' คันแล้ว');
   };
 })();
 </script>
