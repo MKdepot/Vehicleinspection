@@ -72,6 +72,11 @@
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:14px}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 
+  .tile .rp{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;background:#FFEFD2;color:#7A4600;border-radius:999px;padding:1px 8px}
+  .tile.fail .rp{background:#fff;color:var(--fail)}
+  .tag.w{background:#FFEFD2;color:#7A4600}
+  .late{color:var(--fail);font-weight:700}
+  .stat.w b{color:#B26A00}
   dialog{border:0;border-radius:14px;padding:0;max-width:720px;width:94%;background:var(--surface)}
   dialog::backdrop{background:rgba(0,0,0,.5)}
   .dh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line)}
@@ -105,6 +110,7 @@
 
   <div class="tabs" role="tablist">
     <button role="tab" aria-selected="true"  data-tab="day">ภาพรวมรายวัน</button>
+    <button role="tab" aria-selected="false" data-tab="rep">รอซ่อม</button>
     <button role="tab" aria-selected="false" data-tab="insp">ประวัติการตรวจ</button>
     <button role="tab" aria-selected="false" data-tab="item">แยกตามรายการตรวจ</button>
     <button role="tab" aria-selected="false" data-tab="veh">แยกตามคัน</button>
@@ -132,6 +138,21 @@
         <span><i style="border:1.5px dashed var(--muted)"></i>ยังไม่ตรวจ</span>
       </div>
     </div>
+  </section>
+
+  <!-- ===== รอซ่อม ===== -->
+  <section id="pane-rep" class="hide">
+    <div class="stats" id="r-stats"></div>
+    <div class="card">
+      <div class="grid">
+        <div><label class="fld" for="r-status">สถานะ</label>
+          <select id="r-status"><option value="open">รอซ่อม</option><option value="fixed">ซ่อมเสร็จแล้ว</option><option value="">ทั้งหมด</option></select></div>
+        <div><label class="fld" for="r-plate">เบอร์รถ</label><select id="r-plate"><option value="">ทุกคัน</option></select></div>
+        <div><button class="btn" id="r-load" style="width:100%">ดูข้อมูล</button></div>
+        <div><button class="btn ghost" id="r-export" style="width:100%">ส่งออกรายการนี้</button></div>
+      </div>
+    </div>
+    <div class="card tbl" id="r-list"></div>
   </section>
 
   <!-- ===== ตัวกรองช่วงวันที่ (ใช้กับแท็บประวัติ/รายการ/คัน/ส่งออก) ===== -->
@@ -166,6 +187,7 @@
       <div><button class="btn" id="ex-sum" style="width:100%">สรุปรายใบตรวจ (ทุกคัน)</button></div>
       <div><button class="btn" id="ex-all" style="width:100%">รายละเอียดทุกข้อ (ทุกคัน)</button></div>
       <div><button class="btn" id="ex-fail" style="width:100%">เฉพาะข้อที่ไม่ผ่าน</button></div>
+      <div><button class="btn" id="ex-rep" style="width:100%">งานซ่อม (แจ้ง/ซ่อมเสร็จในช่วงนี้)</button></div>
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
     <div class="grid">
@@ -205,6 +227,8 @@
   let DAY  = { insp:[], res:{}, photos:{} };     // ชุดข้อมูลแท็บรายวัน
   let VEH  = [];                                 // ทะเบียนรถทั้งหมด
   let dayFilter = 'all';
+  let OPEN = {};                                 // เบอร์รถ -> จำนวนงานรอซ่อม
+  let REP = [];                                  // รายการในแท็บรอซ่อม
   let rangeLoaded = false, timer = null;
 
   // ---------- gate ----------
@@ -263,11 +287,12 @@
   document.querySelectorAll('[data-tab]').forEach(b=> b.onclick = ()=>{
     const t = b.dataset.tab;
     document.querySelectorAll('[data-tab]').forEach(x=> x.setAttribute('aria-selected', String(x===b)));
-    ['day','insp','item','veh','exp','cars'].forEach(k=> $('#pane-'+k).classList.toggle('hide', k!==t));
+    ['day','rep','insp','item','veh','exp','cars'].forEach(k=> $('#pane-'+k).classList.toggle('hide', k!==t));
     $('#range').classList.toggle('hide', !['insp','item','veh','exp'].includes(t));
     if(t==='day') loadDay();
     if(['insp','item','veh','exp'].includes(t) && !rangeLoaded) load();
     if(t==='cars') renderCars();
+    if(t==='rep') loadRepairs();
   });
 
   // ================= ภาพรวมรายวัน =================
@@ -281,6 +306,8 @@
         .eq('inspect_date', $('#d-date').value).order('inspected_at', { ascending:false });
       if(error) throw error;
       DAY = await withDetails(data);
+      const od = await sb.from('defects').select('vehicle_number').eq('status','open');
+      OPEN = {}; (od.data||[]).forEach(x=> OPEN[x.vehicle_number] = (OPEN[x.vehicle_number]||0) + 1);
       renderDay();
       $('#d-updated').textContent = 'อัปเดตล่าสุด ' + new Date().toLocaleTimeString('th-TH') +
         ($('#d-date').value===today() ? ' • รีเฟรชอัตโนมัติทุก 1 นาที' : '');
@@ -303,8 +330,10 @@
     const wait  = tiles.filter(t=>!t.i).length;
     $('#d-stats').innerHTML =
       stat(total,'รถทั้งหมด','', 'all') + stat(done,'ตรวจแล้ว','p','done') +
-      stat(wait,'ยังไม่ตรวจ','', 'wait') + stat(fail,'ตรวจไม่ผ่าน','f','fail');
+      stat(wait,'ยังไม่ตรวจ','', 'wait') + stat(fail,'ตรวจไม่ผ่าน','f','fail') +
+      '<button class="stat w" id="d-go-rep"><b>'+Object.values(OPEN).reduce((a,b)=>a+b,0)+'</b><span>งานรอซ่อม (ทุกคัน) →</span></button>';
     document.querySelectorAll('#d-stats [data-f]').forEach(b=> b.onclick = ()=>{ dayFilter = b.dataset.f; renderDay(); });
+    $('#d-go-rep').onclick = ()=> document.querySelector('[data-tab=rep]').click();
 
     const pct = n => total ? (n/total*100) : 0;
     const passN = tiles.filter(t=>t.i && t.i.status==='pass' && t.car).length;
@@ -321,11 +350,12 @@
     }
     if(!shown.length){ $('#d-tiles').innerHTML = '<div class="empty" style="grid-column:1/-1">ไม่มีรถในกลุ่มนี้</div>'; return; }
     $('#d-tiles').innerHTML = shown.map(t=>{
-      if(!t.i) return '<div class="tile wait"><div class="no">'+esc(t.v)+'</div><div class="st">ยังไม่ตรวจ</div><div class="tm">'+esc(t.car.vehicle_type||'')+'</div></div>';
+      const rp = OPEN[t.v] ? '<div class="rp">รอซ่อม '+OPEN[t.v]+'</div>' : '';
+      if(!t.i) return '<div class="tile wait"><div class="no">'+esc(t.v)+'</div><div class="st">ยังไม่ตรวจ</div><div class="tm">'+esc(t.car.vehicle_type||'')+'</div>'+rp+'</div>';
       const f = t.i.status==='fail';
       return '<button class="tile '+(f?'fail':'pass')+'" data-id="'+t.i.id+'"><div class="no">'+esc(t.v)+'</div>'+
         '<div class="st">'+(f ? 'ไม่ผ่าน '+t.i.fail_count+' ข้อ' : 'ผ่าน')+'</div>'+
-        '<div class="tm">'+hm(t.i.inspected_at)+(t.car?'':' • ไม่มีในทะเบียน')+'</div></button>';
+        '<div class="tm">'+hm(t.i.inspected_at)+(t.car?'':' • ไม่มีในทะเบียน')+'</div>'+rp+'</button>';
     }).join('');
     document.querySelectorAll('#d-tiles [data-id]').forEach(b=> b.onclick = ()=> detail(b.dataset.id, DAY));
   }
@@ -461,7 +491,7 @@
     const blob = new Blob(['\uFEFF' + rows.map(r=> r.map(q).join(',')).join('\r\n')], { type:'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = name + '_' + $('#f-from').value + '_ถึง_' + $('#f-to').value + '.csv';
+    a.download = (name.endsWith('.csv') ? name : name + '_' + $('#f-from').value + '_ถึง_' + $('#f-to').value + '.csv');
     a.click(); setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
   }
   function detailRows(filterFail, plate){
@@ -497,6 +527,140 @@
     csv(detailRows(false, p), 'ตรวจรถ_เบอร์'+p);
   };
 
+  // ================= รอซ่อม =================
+  const bkkDate = (d=new Date())=> d.toLocaleDateString('en-CA', { timeZone:'Asia/Bangkok' });
+  const daysBetween = (a,b)=> Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+  const thDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}) : '–';
+  const waitDays = d => d.status==='fixed' ? d.days_waiting : daysBetween(d.first_date, bkkDate());
+  $('#r-load').onclick = loadRepairs;
+  $('#r-status').onchange = loadRepairs;
+  $('#r-plate').onchange = loadRepairs;
+
+  async function loadRepairs(){
+    try{
+      let q = sb.from('defects').select('*');
+      const st = $('#r-status').value;
+      if(st) q = q.eq('status', st);
+      if($('#r-plate').value) q = q.eq('vehicle_number', $('#r-plate').value);
+      q = st==='open' ? q.order('first_date', { ascending:true }) : q.order('first_reported_at', { ascending:false }).limit(500);
+      const { data, error } = await q;
+      if(error) throw error;
+      REP = data || [];
+      renderRepairs();
+      // สถิติ
+      const m1 = bkkDate().slice(0,8) + '01';
+      const [op, fx] = await Promise.all([
+        sb.from('defects').select('first_date').eq('status','open'),
+        sb.from('defects').select('days_waiting').eq('status','fixed').gte('fixed_date', m1)
+      ]);
+      const opn = op.data||[], fxd = fx.data||[];
+      const late = opn.filter(d=> daysBetween(d.first_date, bkkDate()) >= 3).length;
+      const avg = fxd.length ? (fxd.reduce((a,d)=>a+(d.days_waiting||0),0)/fxd.length).toFixed(1) : '–';
+      $('#r-stats').innerHTML = stat(opn.length,'รอซ่อมทั้งหมด','w') + stat(late,'รอเกิน 3 วัน','f') +
+        stat(fxd.length,'ซ่อมเสร็จเดือนนี้','p') + stat(avg,'เฉลี่ยวันรอซ่อม (เดือนนี้)');
+    }catch(e){ alert('โหลดรายการซ่อมไม่สำเร็จ: ' + (e.message||e)); }
+  }
+
+  function renderRepairs(){
+    const el = $('#r-list');
+    if(!REP.length) return el.innerHTML = '<div class="empty">'+($('#r-status').value==='open' ? 'ไม่มีงานค้างซ่อม 👍' : 'ไม่มีข้อมูล')+'</div>';
+    el.innerHTML = '<table><thead><tr><th>เบอร์รถ</th><th>รายการ</th><th>อาการที่แจ้ง</th><th>แจ้งครั้งแรก</th><th>รอ (วัน)</th><th>สถานะ</th><th></th></tr></thead><tbody>'+
+      REP.map(d=>{
+        const w = waitDays(d);
+        const stc = d.status==='open'
+          ? '<span class="tag w">รอซ่อม</span><div class="mut" style="font-size:12px">พบ '+(d.seen_count||1)+' ครั้ง</div>'
+          : '<span class="tag p">ซ่อมเสร็จ</span><div class="mut" style="font-size:12px">'+thDate(d.fixed_date)+' • '+esc(d.fixed_by||'')+'</div>';
+        return '<tr class="click" data-id="'+d.id+'"><td class="plate">'+esc(d.vehicle_number)+'</td>'+
+          '<td><b>'+esc(d.item_code)+'</b> '+esc(d.item_label)+'</td><td>'+esc(d.first_detail||'–')+'</td>'+
+          '<td>'+thDate(d.first_date)+'<div class="mut" style="font-size:12px">'+esc(d.reported_by||'')+'</div></td>'+
+          '<td class="'+(d.status==='open' && w>=3 ? 'late' : '')+'">'+w+'</td><td>'+stc+'</td>'+
+          '<td>'+(d.status==='open' ? '<button class="btn sm" data-fix="'+d.id+'">ซ่อมเสร็จ</button>' : '')+'</td></tr>';
+      }).join('')+'</tbody></table>';
+    el.querySelectorAll('tr[data-id]').forEach(tr=> tr.onclick = e=>{
+      if(e.target.closest('[data-fix]')) return;
+      repairDetail(tr.dataset.id);
+    });
+    el.querySelectorAll('[data-fix]').forEach(b=> b.onclick = ()=> repairDetail(b.dataset.fix, true));
+  }
+
+  async function repairDetail(id, focusFix){
+    const d = REP.find(x=>x.id===id); if(!d) return;
+    let pics = '';
+    if(d.first_result_id){
+      const { data } = await sb.from('inspection_photos').select('url').eq('result_id', d.first_result_id);
+      pics = (data||[]).map(p=>'<img src="'+esc(p.url)+'" alt="รูปตอนแจ้ง" onclick="window.open(this.src)">').join('');
+    }
+    const w = waitDays(d);
+    $('#dlg-title').textContent = 'รถ ' + d.vehicle_number + ' • ' + d.item_code + ' ' + d.item_label;
+    let html =
+      '<div class="row f"><b>อาการที่แจ้ง</b><div style="margin-top:4px">'+esc(d.first_detail||'ไม่ได้ระบุรายละเอียด')+'</div>'+
+      (pics ? '<div class="shots">'+pics+'</div>' : '')+'</div>'+
+      '<table style="margin-top:8px"><tbody>'+
+      '<tr><th>วันที่แจ้งครั้งแรก</th><td>'+thDate(d.first_date)+' '+new Date(d.first_reported_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' โดย '+esc(d.reported_by||'-')+'</td></tr>'+
+      '<tr><th>ตรวจพบซ้ำ</th><td>'+(d.seen_count||1)+' ครั้ง • ล่าสุด '+fmt(d.last_seen_at)+'</td></tr>'+
+      '<tr><th>จำนวนวันรอซ่อม</th><td><b>'+w+' วัน</b>'+(d.status==='open'?' (ยังไม่เสร็จ)':'')+'</td></tr>';
+    if(d.status==='fixed'){
+      html += '<tr><th>วันที่ซ่อมเสร็จ</th><td>'+thDate(d.fixed_date)+' โดย '+esc(d.fixed_by||'-')+
+        ' ('+(d.fixed_source==='driver'?'พนง. กดตอนตรวจรถ':'แอดมิน')+')</td></tr>'+
+        (d.fixed_note ? '<tr><th>หมายเหตุ</th><td>'+esc(d.fixed_note)+'</td></tr>' : '');
+    }
+    html += '</tbody></table>';
+    if(d.status==='open'){
+      html += '<div class="card" style="margin:16px 0 0;background:var(--pass-soft);border-color:#B7DCC9">'+
+        '<h2>บันทึกซ่อมเสร็จ</h2>'+
+        '<div class="grid" style="margin-top:10px">'+
+          '<div><label class="fld" for="fx-date">วันที่ซ่อมเสร็จ</label><input id="fx-date" type="date" value="'+bkkDate()+'" min="'+d.first_date+'" max="'+bkkDate()+'"></div>'+
+          '<div><label class="fld" for="fx-by">ผู้บันทึก</label><input id="fx-by" type="text" placeholder="ชื่อผู้ปิดงาน" value="'+esc(localStorage.getItem('vi_fixer')||'')+'"></div>'+
+        '</div>'+
+        '<label class="fld" for="fx-note" style="margin-top:10px">รายละเอียดการซ่อม / หมายเหตุ</label>'+
+        '<textarea id="fx-note" placeholder="เช่น เปลี่ยนหลอดไฟเลี้ยวขวา อู่ ..." style="min-height:70px"></textarea>'+
+        '<button class="btn" id="fx-save" style="margin-top:10px;width:100%">ยืนยันซ่อมเสร็จ</button></div>';
+    }
+    $('#dlg-body').innerHTML = html;
+    $('#dlg').showModal();
+    if(d.status==='open'){
+      if(focusFix) $('#fx-note').focus();
+      $('#fx-save').onclick = async ()=>{
+        const date = $('#fx-date').value, by = $('#fx-by').value.trim();
+        if(!date) return alert('เลือกวันที่ซ่อมเสร็จ');
+        if(!by) return alert('กรอกชื่อผู้บันทึก');
+        localStorage.setItem('vi_fixer', by);
+        $('#fx-save').disabled = true;
+        const at = date === bkkDate() ? new Date().toISOString() : date + 'T12:00:00+07:00';
+        const { data, error } = await sb.from('defects').update({
+          status:'fixed', fixed_date: date, fixed_at: at, fixed_by: by, fixed_source:'admin',
+          fixed_note: $('#fx-note').value.trim() || null
+        }).eq('id', d.id).eq('status','open').select('id');
+        $('#fx-save').disabled = false;
+        if(error) return alert('บันทึกไม่สำเร็จ: ' + error.message);
+        if(!data || !data.length) alert('งานนี้ถูกปิดไปแล้วก่อนหน้านี้');
+        $('#dlg').close();
+        loadRepairs();
+      };
+    }
+  }
+
+  function repairCsv(list, name){
+    const out = [['เบอร์รถ','ทะเบียน','ข้อ','รายการตรวจ','อาการที่แจ้ง','วันที่แจ้งครั้งแรก','ผู้แจ้ง','ตรวจพบซ้ำ (ครั้ง)','สถานะ','วันที่ซ่อมเสร็จ','ผู้ปิดงาน','ปิดงานจาก','จำนวนวันรอซ่อม','หมายเหตุการซ่อม']];
+    list.forEach(d=>{
+      const car = VEH.find(v=>v.vehicle_number===d.vehicle_number) || {};
+      out.push([ d.vehicle_number, car.plate||'', d.item_code, d.item_label, d.first_detail||'',
+        thDate(d.first_date), d.reported_by||'', d.seen_count||1, d.status==='open'?'รอซ่อม':'ซ่อมเสร็จ',
+        d.status==='fixed'?thDate(d.fixed_date):'', d.fixed_by||'', d.fixed_source==='driver'?'พนง.':(d.fixed_source==='admin'?'แอดมิน':''),
+        waitDays(d), d.fixed_note||'' ]);
+    });
+    csv(out, name);
+  }
+  $('#r-export').onclick = ()=> repairCsv(REP, 'งานซ่อม_' + bkkDate() + '.csv');
+  $('#ex-rep').onclick = async ()=>{
+    const a = $('#f-from').value, b = $('#f-to').value;
+    const { data, error } = await sb.from('defects').select('*')
+      .or('and(first_date.gte.'+a+',first_date.lte.'+b+'),and(fixed_date.gte.'+a+',fixed_date.lte.'+b+')')
+      .order('first_date');
+    if(error) return alert(error.message);
+    repairCsv(data||[], 'งานซ่อม');
+  };
+
   // ================= จัดการรถ =================
   async function loadVehicles(){
     const { data, error } = await sb.from('vehicles').select('*').order('vehicle_number');
@@ -505,6 +669,7 @@
     const opts = VEH.map(v=> '<option>'+esc(v.vehicle_number)+'</option>').join('');
     $('#f-plate').innerHTML = '<option value="">ทุกคัน</option>' + opts;
     $('#ex-plate').innerHTML = '<option value="">— เลือก —</option>' + opts;
+    $('#r-plate').innerHTML = '<option value="">ทุกคัน</option>' + opts;
   }
 
   function renderCars(){
