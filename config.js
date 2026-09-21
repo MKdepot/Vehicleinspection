@@ -5,7 +5,7 @@ window.CONFIG = {
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4b2Fiamtua2Rja3Noaml1dml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQxNTksImV4cCI6MjEwNTE4MDE1OX0.cT3e_QeghIxj3UFk4L9-9lnijTT9pqvDzLrBaCnJYig',
 
   // LIFF ID จาก LINE Developers (เว้นว่างไว้ = โหมดทดสอบบนเบราว์เซอร์ปกติ)
-  LIFF_ID: 'https://liff.line.me/1660796030-hQllf4RI',
+  LIFF_ID: '1660796030-hQllf4RI',
 
   // รหัสเข้าหน้าแอดมิน
   ADMIN_PIN: '1101',
