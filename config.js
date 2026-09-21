@@ -10,6 +10,10 @@ window.CONFIG = {
   // รหัสเข้าหน้าแอดมิน
   ADMIN_PIN: '1101',
 
+  
   // ชื่อ bucket เก็บรูป (ตรงกับ schema.sql)
-  BUCKET: 'inspection-photos'
+  BUCKET: 'inspection-photos',
+ 
+  // แจ้งเตือนเข้ากลุ่ม LINE เมื่อตรวจไม่ผ่าน (ต้อง deploy Edge Function "notify-fail" ก่อน)
+  NOTIFY_ENABLED: false
 };
