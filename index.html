@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ตรวจรถก่อนใช้งาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16211C; --muted:#5E6B64; --line:#DCE3DF;
+    --bg:#F1F4F2; --surface:#FFFFFF;
+    --pass:#0F7B4F; --pass-soft:#E4F2EB;
+    --fail:#C22F2F; --fail-soft:#FBEAEA;
+    --warn:#B26A00;
+    --pad:16px;
+    box-sizing:border-box;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'IBM Plex Sans Thai',system-ui,sans-serif;
+    background:var(--bg); color:var(--ink);
+    font-size:16px; line-height:1.5;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:var(--pad) var(--pad) 120px}
+  h1{font-size:22px;font-weight:700;margin:0 0 4px}
+  h2{font-size:15px;font-weight:600;margin:0}
+  p.sub{color:var(--muted);margin:0 0 20px;font-size:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  label.fld{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+  input[type=text],input[type=tel],textarea{
+    width:100%;font:inherit;padding:12px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink)
+  }
+  textarea{min-height:76px;resize:vertical}
+  input:focus,textarea:focus,button:focus-visible{outline:3px solid #9ED3BC;outline-offset:1px}
+  .btn{
+    display:block;width:100%;font:inherit;font-weight:600;border:0;border-radius:12px;
+    padding:15px;background:var(--pass);color:#fff;cursor:pointer
+  }
+  .btn:disabled{opacity:.45}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .plate{
+    width:100%;font-family:inherit;font-size:44px;font-weight:700;letter-spacing:.22em;
+    text-align:center;padding:14px;border:2px solid var(--line);border-radius:14px;background:#fff
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+
+  /* header */
+  .bar{
+    position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+    padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 10px;
+    display:flex;align-items:center;gap:12px
+  }
+  .bar .no{font-size:26px;font-weight:700;letter-spacing:.12em}
+  .bar .meta{font-size:13px;color:var(--muted);flex:1}
+  .count{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+
+  /* checklist */
+  .sec{margin:22px 0 8px;display:flex;align-items:baseline;gap:8px}
+  .sec .n{font-size:13px;font-weight:700;color:var(--pass)}
+  .item{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px}
+  .item.ok{border-left-color:var(--pass)}
+  .item.ng{border-left-color:var(--fail);background:var(--fail-soft)}
+  .item .txt{display:flex;gap:8px;margin-bottom:12px}
+  .item .code{font-weight:700;color:var(--muted);min-width:30px}
+  .must{color:var(--warn);font-size:13px;font-weight:600;display:block;margin-top:2px}
+  .seg{display:flex;gap:8px}
+  .seg button{
+    flex:1;font:inherit;font-weight:700;padding:12px 4px;border-radius:10px;
+    border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer
+  }
+  .seg button[aria-pressed="true"].yes{background:var(--pass);border-color:var(--pass);color:#fff}
+  .seg button[aria-pressed="true"].no{background:var(--fail);border-color:var(--fail);color:#fff}
+  .ngbox{margin-top:12px;padding-top:12px;border-top:1px dashed #E2B8B8}
+  .photo-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .pbtn{flex:1;min-width:130px;text-align:center;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px;font:inherit;font-weight:600;cursor:pointer}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb button{position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:22px;padding:0;cursor:pointer}
+
+  /* footer */
+  .foot{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);
+    border-top:1px solid var(--line);padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom,0px))
+  }
+  .foot .inner{max-width:560px;margin:0 auto}
+  .status{font-size:13px;color:var(--muted);margin-bottom:8px;text-align:center}
+  .status b.ng{color:var(--fail)}
+
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#16211C;color:#fff;padding:11px 18px;border-radius:999px;font-size:14px;z-index:60;max-width:88%;text-align:center}
+  .hide{display:none!important}
+  .center{text-align:center;padding:60px 20px;color:var(--muted)}
+  .big{font-size:56px;line-height:1}
+  .err{background:var(--fail-soft);border:1px solid #E7B9B9;color:#8A2222;border-radius:10px;padding:12px;font-size:14px;margin-bottom:12px}
+  @media (prefers-reduced-motion:no-preference){.toast{animation:pop .18s ease-out}}
+  @keyframes pop{from{opacity:0;transform:translate(-50%,8px)}}
+</style>
+</head>
+<body>
+
+<!-- โหลด -->
+<div id="loading" class="center"><div class="big">⏳</div><p>กำลังเชื่อมต่อ…</p></div>
+
+<!-- 1. ลงทะเบียนครั้งแรก -->
+<section id="page-reg" class="wrap hide">
+  <h1>ลงทะเบียนครั้งแรก</h1>
+  <p class="sub">กรอกชื่อ–นามสกุลหนึ่งครั้ง ครั้งต่อไปเข้าใช้งานได้ทันที</p>
+  <div class="card">
+    <div style="margin-bottom:14px">
+      <label class="fld" for="fn">ชื่อ</label>
+      <input id="fn" type="text" autocomplete="given-name" placeholder="เช่น สมชาย">
+    </div>
+    <div>
+      <label class="fld" for="ln">นามสกุล</label>
+      <input id="ln" type="text" autocomplete="family-name" placeholder="เช่น ใจดี">
+    </div>
+  </div>
+  <button class="btn" id="btn-reg">บันทึกและเริ่มใช้งาน</button>
+</section>
+
+<!-- 2. กรอกเบอร์รถ -->
+<section id="page-vehicle" class="wrap hide">
+  <h1 id="hello">ตรวจรถก่อนใช้งาน</h1>
+  <p class="sub" id="hello-sub"></p>
+  <div class="card">
+    <label class="fld" for="plate">เบอร์รถ 3 หลัก</label>
+    <input id="plate" class="plate" type="tel" inputmode="numeric" maxlength="3" placeholder="000">
+    <div class="chips" id="recent"></div>
+  </div>
+  <button class="btn" id="btn-start" disabled>เริ่มตรวจรถ</button>
+</section>
+
+<!-- 3. รายการตรวจ -->
+<section id="page-check" class="hide">
+  <div class="bar">
+    <div class="no" id="bar-plate">000</div>
+    <div class="meta" id="bar-name"></div>
+    <div class="count" id="bar-count">0/20</div>
+  </div>
+  <div class="wrap" style="padding-top:12px">
+    <div id="list"></div>
+    <div class="card" style="margin-top:16px">
+      <label class="fld" for="other">ความผิดปกติอื่น ๆ</label>
+      <textarea id="other" placeholder="ไม่มี / ระบุสิ่งที่พบเพิ่มเติม"></textarea>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="inner">
+      <div class="status" id="foot-status">เลือกผลให้ครบทุกข้อ</div>
+      <button class="btn" id="btn-save" disabled>บันทึกผลการตรวจ</button>
+    </div>
+  </div>
+</section>
+
+<!-- 4. เสร็จสิ้น -->
+<section id="page-done" class="wrap hide">
+  <div class="center">
+    <div class="big" id="done-icon">✅</div>
+    <h1 id="done-title">บันทึกแล้ว</h1>
+    <p class="sub" id="done-sub"></p>
+  </div>
+  <div class="card hide" id="done-fails"></div>
+  <button class="btn hide" id="btn-repair" style="background:var(--fail);margin-bottom:10px">ส่งแจ้งซ่อม</button>
+  <button class="btn ghost" id="btn-again">ตรวจคันต่อไป</button>
+</section>
+
+<div id="toast" class="toast hide"></div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script>
+(function(){
+  'use strict';
+  const C = window.CONFIG;
+  const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  const $ = s => document.querySelector(s);
+
+  const state = { user:null, emp:null, items:[], answers:{}, plate:'', saving:false, lastFails:[], lastId:null };
+
+  function show(id){
+    ['loading','page-reg','page-vehicle','page-check','page-done'].forEach(p=>{
+      const el = document.getElementById(p); if(el) el.classList.toggle('hide', p!==id);
+    });
+    window.scrollTo(0,0);
+  }
+  let toastT;
+  function toast(msg){
+    const t = $('#toast'); t.textContent = msg; t.classList.remove('hide');
+    clearTimeout(toastT); toastT = setTimeout(()=>t.classList.add('hide'), 2600);
+  }
+  function fail(msg){
+    document.getElementById('loading').innerHTML =
+      '<div class="wrap"><div class="err">'+msg+'</div><button class="btn ghost" onclick="location.reload()">ลองใหม่</button></div>';
+    show('loading');
+  }
+
+  // ---------- เริ่มต้น: LIFF ----------
+  async function init(){
+    try{
+      if(C.LIFF_ID){
+        await liff.init({ liffId: C.LIFF_ID });
+        if(!liff.isLoggedIn()){ liff.login(); return; }
+        const p = await liff.getProfile();
+        state.user = { userId:p.userId, displayName:p.displayName, pictureUrl:p.pictureUrl };
+      }else{
+        let id = localStorage.getItem('devUserId');
+        if(!id){ id = 'DEV-' + Math.random().toString(36).slice(2,10); localStorage.setItem('devUserId', id); }
+        state.user = { userId:id, displayName:'โหมดทดสอบ', pictureUrl:null };
+      }
+    }catch(e){
+      return fail('เชื่อมต่อ LINE ไม่สำเร็จ: ' + (e.message||e));
+    }
+
+    try{
+      const { data, error } = await sb.from('employees').select('*').eq('line_user_id', state.user.userId).maybeSingle();
+      if(error) throw error;
+      const it = await sb.from('checklist_items').select('*').eq('active', true).order('sort_order');
+      if(it.error) throw it.error;
+      state.items = it.data || [];
+      if(data){ state.emp = data; goVehicle(); } else { show('page-reg'); }
+    }catch(e){
+      fail('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (e.message||e));
+    }
+  }
+
+  // ---------- ลงทะเบียน ----------
+  $('#btn-reg').addEventListener('click', async ()=>{
+    const fn = $('#fn').value.trim(), ln = $('#ln').value.trim();
+    if(!fn || !ln) return toast('กรอกชื่อและนามสกุลให้ครบ');
+    $('#btn-reg').disabled = true;
+    const { data, error } = await sb.from('employees').insert({
+      line_user_id: state.user.userId, first_name: fn, last_name: ln,
+      display_name: state.user.displayName, picture_url: state.user.pictureUrl
+    }).select().single();
+    $('#btn-reg').disabled = false;
+    if(error) return toast('บันทึกไม่สำเร็จ: ' + error.message);
+    state.emp = data; goVehicle();
+  });
+
+  // ---------- หน้าเบอร์รถ ----------
+  async function goVehicle(){
+    const name = state.emp.first_name + ' ' + state.emp.last_name;
+    $('#hello').textContent = 'สวัสดี ' + state.emp.first_name;
+    $('#hello-sub').textContent = 'กรอกเบอร์รถที่จะตรวจ (' + name + ')';
+    $('#plate').value = ''; $('#btn-start').disabled = true;
+    show('page-vehicle');
+    $('#plate').focus();
+    const { data } = await sb.from('inspections').select('vehicle_number')
+      .eq('line_user_id', state.user.userId).order('inspected_at',{ascending:false}).limit(12);
+    const seen = [...new Set((data||[]).map(r=>r.vehicle_number))].slice(0,5);
+    const box = $('#recent'); box.innerHTML = '';
+    seen.forEach(v=>{
+      const b = document.createElement('button');
+      b.className='chip'; b.type='button'; b.textContent = v;
+      b.onclick = ()=>{ $('#plate').value = v; $('#btn-start').disabled = false; };
+      box.appendChild(b);
+    });
+  }
+  $('#plate').addEventListener('input', e=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
+    $('#btn-start').disabled = e.target.value.length !== 3;
+  });
+  $('#btn-start').addEventListener('click', ()=>{
+    state.plate = $('#plate').value;
+    state.answers = {}; $('#other').value = '';
+    renderList(); show('page-check');
+  });
+
+  // ---------- รายการตรวจ ----------
+  function renderList(){
+    $('#bar-plate').textContent = state.plate;
+    $('#bar-name').textContent = state.emp.first_name + ' ' + state.emp.last_name;
+    const list = $('#list'); list.innerHTML = '';
+    let sec = null;
+    state.items.forEach(item=>{
+      if(item.section_name !== sec){
+        sec = item.section_name;
+        const h = document.createElement('div');
+        h.className = 'sec';
+        h.innerHTML = '<span class="n">'+item.section+'</span><h2>'+sec+'</h2>';
+        list.appendChild(h);
+      }
+      const d = document.createElement('div');
+      d.className = 'item'; d.id = 'it-'+item.id;
+      d.innerHTML =
+        '<div class="txt"><span class="code">'+item.code+'</span><span>'+item.label+
+        (item.critical ? '<span class="must">ไม่ผ่าน = ต้องแก้ไขทันที</span>' : '')+'</span></div>'+
+        '<div class="seg">'+
+          '<button type="button" class="yes" data-r="pass" aria-pressed="false">ผ่าน</button>'+
+          '<button type="button" class="no"  data-r="fail" aria-pressed="false">ไม่ผ่าน</button>'+
+        '</div><div class="ngbox hide"></div>';
+      d.querySelectorAll('.seg button').forEach(b=>{
+        b.onclick = ()=> setAnswer(item, b.dataset.r);
+      });
+      list.appendChild(d);
+    });
+    updateFoot();
+  }
+
+  function setAnswer(item, result){
+    const cur = state.answers[item.id];
+    if(cur && cur.result === result && result === 'fail') return;
+    state.answers[item.id] = state.answers[item.id] || { detail:'', photos:[] };
+    state.answers[item.id].result = result;
+    const box = document.getElementById('it-'+item.id);
+    box.classList.toggle('ok', result==='pass');
+    box.classList.toggle('ng', result==='fail');
+    box.querySelectorAll('.seg button').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.r===result)));
+    const ng = box.querySelector('.ngbox');
+    if(result === 'fail'){ ng.classList.remove('hide'); renderNg(item, ng); }
+    else { ng.classList.add('hide'); ng.innerHTML=''; ng.dataset.built=''; state.answers[item.id].detail=''; state.answers[item.id].photos=[]; }
+    updateFoot();
+  }
+
+  function renderNg(item, ng){
+    if(ng.dataset.built === '1'){ return; }
+    ng.dataset.built = '1';
+    ng.innerHTML =
+      '<label class="fld">รายละเอียดที่พบ</label>'+
+      '<textarea placeholder="ระบุสิ่งที่พบ เช่น ไฟเลี้ยวขวาไม่ติด"></textarea>'+
+      '<div class="photo-row">'+
+        '<button type="button" class="pbtn" data-a="cam">📷 ถ่ายรูป</button>'+
+        '<button type="button" class="pbtn" data-a="file">🖼 แนบรูป</button>'+
+      '</div>'+
+      '<input type="file" accept="image/*" capture="environment" class="hide" data-i="cam">'+
+      '<input type="file" accept="image/*" multiple class="hide" data-i="file">'+
+      '<div class="thumbs"></div>';
+    const ta = ng.querySelector('textarea');
+    ta.value = state.answers[item.id].detail || '';
+    ta.oninput = ()=>{ state.answers[item.id].detail = ta.value; };
+    ng.querySelector('[data-a=cam]').onclick  = ()=> ng.querySelector('[data-i=cam]').click();
+    ng.querySelector('[data-a=file]').onclick = ()=> ng.querySelector('[data-i=file]').click();
+    ng.querySelectorAll('input[type=file]').forEach(inp=>{
+      inp.onchange = async e=>{
+        for(const f of e.target.files){
+          if(state.answers[item.id].photos.length >= 5){ toast('แนบได้สูงสุด 5 รูปต่อข้อ'); break; }
+          try{
+            const blob = await compress(f);
+            state.answers[item.id].photos.push(blob);
+          }catch(err){ toast('อ่านไฟล์รูปไม่ได้'); }
+        }
+        e.target.value = '';
+        drawThumbs(item, ng);
+      };
+    });
+  }
+
+  function drawThumbs(item, ng){
+    const box = ng.querySelector('.thumbs'); box.innerHTML = '';
+    state.answers[item.id].photos.forEach((blob, i)=>{
+      const d = document.createElement('div'); d.className='thumb';
+      const img = document.createElement('img'); img.src = URL.createObjectURL(blob);
+      const x = document.createElement('button'); x.type='button'; x.textContent='×';
+      x.setAttribute('aria-label','ลบรูป');
+      x.onclick = ()=>{ state.answers[item.id].photos.splice(i,1); drawThumbs(item, ng); };
+      d.appendChild(img); d.appendChild(x); box.appendChild(d);
+    });
+  }
+
+  // ย่อรูปก่อนอัปโหลด (กัน 4G ช้า)
+  function compress(file, max=1400, q=0.72){
+    return new Promise((res, rej)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let { width:w, height:h } = img;
+        const s = Math.min(1, max/Math.max(w,h));
+        w = Math.round(w*s); h = Math.round(h*s);
+        const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        cv.toBlob(b=> b ? res(b) : rej(new Error('blob')), 'image/jpeg', q);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = rej;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  function updateFoot(){
+    const done = Object.keys(state.answers).length;
+    const total = state.items.length;
+    const ng = state.items.filter(i=> state.answers[i.id] && state.answers[i.id].result==='fail').length;
+    $('#bar-count').textContent = done + '/' + total;
+    $('#foot-status').innerHTML = done < total
+      ? ('ยังเหลืออีก ' + (total-done) + ' ข้อ')
+      : (ng ? ('ไม่ผ่าน <b class="ng">' + ng + ' ข้อ</b>') : 'ผ่านครบทุกข้อ');
+    $('#btn-save').disabled = done < total || state.saving;
+  }
+
+  // ---------- บันทึก ----------
+  $('#btn-save').addEventListener('click', async ()=>{
+    if(state.saving) return;
+    const missingDetail = state.items.filter(i=>{
+      const a = state.answers[i.id];
+      return a && a.result==='fail' && !(a.detail||'').trim();
+    });
+    if(missingDetail.length){
+      toast('กรอกรายละเอียดข้อ ' + missingDetail.map(i=>i.code).join(', '));
+      document.getElementById('it-'+missingDetail[0].id).scrollIntoView({block:'center'});
+      return;
+    }
+    state.saving = true; $('#btn-save').disabled = true; $('#btn-save').textContent = 'กำลังบันทึก…';
+    try{
+      const fails = state.items.filter(i=> state.answers[i.id].result==='fail');
+      const ins = await sb.from('inspections').insert({
+        employee_id: state.emp.id,
+        line_user_id: state.user.userId,
+        inspector_name: state.emp.first_name + ' ' + state.emp.last_name,
+        vehicle_number: state.plate,
+        total_items: state.items.length,
+        fail_count: fails.length,
+        status: fails.length ? 'fail' : 'pass',
+        other_note: $('#other').value.trim() || null
+      }).select().single();
+      if(ins.error) throw ins.error;
+      const inspId = ins.data.id;
+
+      const rows = state.items.map(i=>({
+        inspection_id: inspId, item_id: i.id, item_code: i.code, item_label: i.label,
+        section_name: i.section_name, sort_order: i.sort_order,
+        result: state.answers[i.id].result,
+        detail: (state.answers[i.id].detail||'').trim() || null
+      }));
+      const res = await sb.from('inspection_results').insert(rows).select('id,item_id');
+      if(res.error) throw res.error;
+      const map = {}; res.data.forEach(r=> map[r.item_id] = r.id);
+
+      const photoRows = [];
+      for(const i of fails){
+        const ps = state.answers[i.id].photos;
+        for(let k=0;k<ps.length;k++){
+          const path = inspId + '/' + i.code.replace('.','_') + '_' + (k+1) + '_' + Date.now() + '.jpg';
+          const up = await sb.storage.from(C.BUCKET).upload(path, ps[k], { contentType:'image/jpeg', upsert:true });
+          if(up.error) throw up.error;
+          const { data:pub } = sb.storage.from(C.BUCKET).getPublicUrl(path);
+          photoRows.push({ result_id: map[i.id], inspection_id: inspId, path, url: pub.publicUrl });
+        }
+      }
+      if(photoRows.length){
+        const ph = await sb.from('inspection_photos').insert(photoRows);
+        if(ph.error) throw ph.error;
+      }
+
+      state.lastId = inspId;
+      state.lastFails = fails.map(i=>({ code:i.code, label:i.label, detail:state.answers[i.id].detail }));
+      done(fails.length);
+    }catch(e){
+      toast('บันทึกไม่สำเร็จ: ' + (e.message||e));
+    }finally{
+      state.saving = false; $('#btn-save').textContent = 'บันทึกผลการตรวจ'; updateFoot();
+    }
+  });
+
+  function done(nFail){
+    $('#done-icon').textContent = nFail ? '⚠️' : '✅';
+    $('#done-title').textContent = nFail ? ('พบไม่ผ่าน ' + nFail + ' ข้อ') : 'ตรวจผ่านทั้งหมด';
+    $('#done-sub').textContent = 'รถเบอร์ ' + state.plate + ' • ' + new Date().toLocaleString('th-TH');
+    const box = $('#done-fails');
+    if(nFail){
+      box.innerHTML = state.lastFails.map(f=>
+        '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>'+f.code+'</b> '+f.label+
+        '<div style="color:var(--muted);font-size:14px">'+(f.detail||'')+'</div></div>').join('');
+      box.classList.remove('hide'); $('#btn-repair').classList.remove('hide');
+    }else{ box.classList.add('hide'); $('#btn-repair').classList.add('hide'); }
+    show('page-done');
+  }
+  $('#btn-repair').addEventListener('click', ()=> toast('ระบบแจ้งซ่อมจะเปิดใช้ในเฟส 2'));
+  $('#btn-again').addEventListener('click', goVehicle);
+
+  init();
+})();
+</script>
+</body>
+</html>
